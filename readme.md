@@ -1,7 +1,7 @@
 # Личный проект «Типотека» [![Build status][travis-image]][travis-url]
 
 * Студент: [Ольга Ильютко](https://up.htmlacademy.ru/nodejs/3/user/764565).
-* Наставник: `Неизвестно`.
+* Наставник: [Вадим Осюков](https://htmlacademy.ru/profile/id1411353).
 
 ---
 
