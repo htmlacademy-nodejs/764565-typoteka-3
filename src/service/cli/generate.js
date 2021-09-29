@@ -3,9 +3,8 @@
 const {
   getRandomInt,
   shuffle,
+  writeJsonFile,
 } = require(`../../utils`);
-
-const fs = require(`fs`);
 
 const DEFAULT_COUNT = 1;
 const FILE_NAME = `mocks.json`;
@@ -60,29 +59,57 @@ const CATEGORIES = [
   `Железо`,
 ];
 
-let currentDate = new Date();
+const generateRandomTitle = (titles) => {
+  return titles[getRandomInt(0, TITLES.length - 1)];
+};
 
-const generatePublications = (count) => (
-  Array(count).fill({}).map(() => ({
-    title: TITLES[getRandomInt(0, TITLES.length - 1)],
-    createdDate: new Date(getRandomInt(currentDate.setMonth(currentDate.getMonth - 3), currentDate)),
-    announce: shuffle(SENTENCES).slice(0, 4).join(` `),
-    fullText: shuffle(SENTENCES).slice(0, getRandomInt(0, SENTENCES.length - 1)).join(` `),
-    category: [CATEGORIES[getRandomInt(0, CATEGORIES.length - 1)]],
-  }))
-);
+const generateRandomCreatedDate = (date) => {
+  return new Date(getRandomInt(date.setMonth(date.getMonth() - 3), date));
+};
+
+const generateRandomAnnounce = (sentences) => {
+  return shuffle(sentences).slice(0, 4).join(` `);
+};
+
+const generateRandomFullText = (sentences) => {
+  return shuffle(sentences).slice(0, getRandomInt(0, sentences.length - 1)).join(` `);
+};
+
+const generateRandomCategory = (categories) => {
+  return categories[getRandomInt(0, categories.length - 1)];
+};
+
+const generatePublications = (count) => {
+  const currentDate = new Date();
+  return Array(count).fill({}).map(() => ({
+    title: generateRandomTitle(TITLES),
+    createdDate: generateRandomCreatedDate(currentDate),
+    announce: generateRandomAnnounce(SENTENCES),
+    fullText: generateRandomFullText(SENTENCES),
+    category: generateRandomCategory(CATEGORIES),
+  }));
+};
+
+const isCountPublicationsOverflow = (countPublications) => {
+  if (countPublications <= 1000) {
+    return;
+  } else {
+    throw new Error(`Не больше 1000 публикаций`);
+  }
+};
+
 
 module.exports = {
   name: `--generate`,
   run(args) {
     const [count] = args;
     const countPublications = Number.parseInt(count, 10) || DEFAULT_COUNT;
-    const content = JSON.stringify(generatePublications(countPublications));
-    fs.writeFile(FILE_NAME, content, (err) => {
-      if (err) {
-        return console.error(`Can't write data to file...`);
-      }
-      return console.info(`Operation success. File created.`);
-    });
+    try {
+      isCountPublicationsOverflow(countPublications);
+      const content = generatePublications(countPublications);
+      writeJsonFile(FILE_NAME, content);
+    } catch (err) {
+      console.log(err);
+    }
   }
 };
