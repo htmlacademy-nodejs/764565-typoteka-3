@@ -60,7 +60,7 @@ const CATEGORIES = [
   `Железо`,
 ];
 
-var currentDate = new Date();
+let currentDate = new Date();
 
 const generatePublications = (count) => (
   Array(count).fill({}).map(() => ({
@@ -68,7 +68,7 @@ const generatePublications = (count) => (
     createdDate: new Date(getRandomInt(currentDate.setMonth(currentDate.getMonth - 3), currentDate)),
     announce: shuffle(SENTENCES).slice(0, 4).join(` `),
     fullText: shuffle(SENTENCES).slice(0, getRandomInt(0, SENTENCES.length - 1)).join(` `),
-    category: [CATEGORIES[getRandomInt(0, CATEGORIES.length - 1)]],    
+    category: [CATEGORIES[getRandomInt(0, CATEGORIES.length - 1)]],
   }))
 );
 
@@ -83,6 +83,6 @@ module.exports = {
         return console.error(`Can't write data to file...`);
       }
       return console.info(`Operation success. File created.`);
-    });    
+    });
   }
 };
