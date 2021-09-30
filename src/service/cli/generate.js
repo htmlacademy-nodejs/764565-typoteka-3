@@ -6,7 +6,8 @@ const {
   writeJsonFile,
 } = require(`../../utils`);
 
-const DEFAULT_COUNT = 1;
+const DEFAULT_PUBLICATIONS_COUNT = 1;
+const MAX_PUBLICATIONS_COUNT = 1000;
 const FILE_NAME = `mocks.json`;
 
 const TITLES = [
@@ -91,10 +92,10 @@ const generatePublications = (count) => {
 };
 
 const isCountPublicationsOverflow = (countPublications) => {
-  if (countPublications <= 1000) {
+  if (countPublications <= MAX_PUBLICATIONS_COUNT) {
     return;
   } else {
-    throw new Error(`Не больше 1000 публикаций`);
+    throw new Error(`Не больше `+ MAX_PUBLICATIONS_COUNT + ` публикаций`);
   }
 };
 
@@ -103,13 +104,13 @@ module.exports = {
   name: `--generate`,
   run(args) {
     const [count] = args;
-    const countPublications = Number.parseInt(count, 10) || DEFAULT_COUNT;
+    const countPublications = Number.parseInt(count, 10) || DEFAULT_PUBLICATIONS_COUNT;
     try {
       isCountPublicationsOverflow(countPublications);
       const content = generatePublications(countPublications);
       writeJsonFile(FILE_NAME, content);
     } catch (err) {
-      console.log(err);
+      console.log(err.message);
     }
   }
 };
