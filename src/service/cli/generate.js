@@ -91,7 +91,7 @@ const generatePublications = (count) => {
   }));
 };
 
-const isCountPublicationsOverflow = (countPublications) => {
+const checkCountPublicationsOverflow = (countPublications) => {
   if (countPublications <= MAX_PUBLICATIONS_COUNT) {
     return;
   } else {
@@ -106,7 +106,7 @@ module.exports = {
     const [count] = args;
     const countPublications = Number.parseInt(count, 10) || DEFAULT_PUBLICATIONS_COUNT;
     try {
-      isCountPublicationsOverflow(countPublications);
+      checkCountPublicationsOverflow(countPublications);
       const content = generatePublications(countPublications);
       writeJsonFile(FILE_NAME, content);
     } catch (err) {
