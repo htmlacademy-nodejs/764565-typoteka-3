@@ -1,6 +1,7 @@
 'use strict';
 
 const fs = require(`fs`);
+const chalk = require(`chalk`);
 
 module.exports.getRandomInt = (min, max) => {
   min = Math.ceil(min);
@@ -22,7 +23,7 @@ module.exports.writeJsonFile = (fileName, data) => {
   try {
     const jsonStr = JSON.stringify(data);
     fs.writeFileSync(fileName, jsonStr);
-    console.info(`Operation success. File created.`);
+    console.info(chalk.green(`Operation success. File created.`));
   } catch (err) {
     console.error(err);
     throw new Error(`Can't write data to file...`);

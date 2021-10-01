@@ -1,5 +1,7 @@
 'use strict';
 
+const chalk = require(`chalk`);
+
 const {
   getRandomInt,
   shuffle,
@@ -95,22 +97,22 @@ const checkCountPublicationsOverflow = (countPublications) => {
   if (countPublications <= MAX_PUBLICATIONS_COUNT) {
     return;
   } else {
-    throw new Error(`Не больше `+ MAX_PUBLICATIONS_COUNT + ` публикаций`);
+    throw new Error(`Не больше ` + MAX_PUBLICATIONS_COUNT + ` публикаций`);
   }
 };
 
 
 module.exports = {
   name: `--generate`,
-  run(args) {
+  async run(args) {
     const [count] = args;
     const countPublications = Number.parseInt(count, 10) || DEFAULT_PUBLICATIONS_COUNT;
     try {
       checkCountPublicationsOverflow(countPublications);
       const content = generatePublications(countPublications);
-      writeJsonFile(FILE_NAME, content);
+      await writeJsonFile(FILE_NAME, content);
     } catch (err) {
-      console.log(err.message);
+      console.log(chalk.red(err.message));
     }
   }
 };
