@@ -20,12 +20,14 @@ module.exports.shuffle = (someArray) => {
 };
 
 module.exports.writeJsonFile = (fileName, data) => {
-  try {
-    const jsonStr = JSON.stringify(data);
-    fs.writeFileSync(fileName, jsonStr);
-    console.info(chalk.green(`Operation success. File created.`));
-  } catch (err) {
-    console.error(err);
-    throw new Error(`Can't write data to file...`);
-  }
+  (async () => {
+    try {
+      const jsonStr = JSON.stringify(data);
+      await fs.writeFileSync(fileName, jsonStr);
+      console.info(chalk.green(`Operation success. File created.`));
+    } catch (err) {
+      console.error(err);
+      throw new Error(`Can't write data to file...`);
+    }
+  })();
 };
