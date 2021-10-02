@@ -113,6 +113,7 @@ module.exports = {
       await writeJsonFile(FILE_NAME, content);
     } catch (err) {
       console.log(chalk.red(err.message));
+      throw err;
     }
   }
 };
