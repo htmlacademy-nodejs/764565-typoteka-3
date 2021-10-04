@@ -59,14 +59,17 @@ const checkCountPublicationsOverflow = (countPublications) => {
 module.exports = {
   name: `--generate`,
   async run(args) {
-    const sentences = await readContentFromFile(FILE_SENTENCES_PATH);
-    const titles = await readContentFromFile(FILE_TITLES_PATH);
-    const categories = await readContentFromFile(FILE_CATEGORIES_PATH);
-
     const [count] = args;
     const countPublications = Number.parseInt(count, 10) || DEFAULT_PUBLICATIONS_COUNT;
     try {
       checkCountPublicationsOverflow(countPublications);
+
+      const [sentences, titles, categories] = await Promise.all([
+        readContentFromFile(FILE_SENTENCES_PATH),
+        readContentFromFile(FILE_TITLES_PATH),
+        readContentFromFile(FILE_CATEGORIES_PATH)
+      ]);
+
       const content = generatePublications(countPublications, titles, categories, sentences);
       await writeJsonFile(FILE_NAME, content);
     } catch (err) {

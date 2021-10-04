@@ -25,7 +25,7 @@ module.exports.readContentFromFile = async (filePath) => {
     return content.trim().split(`\n`);
   } catch (err) {
     console.error(chalk.red(`Error read file: ${filePath} ${err.message}`));
-    return [];
+    throw new Error(`Can't read data from file...`);
   }
 };
 
