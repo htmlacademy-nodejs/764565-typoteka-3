@@ -19,13 +19,23 @@ module.exports.shuffle = (someArray) => {
   return someArray;
 };
 
+module.exports.readContentFromFile = async (filePath) => {
+  try {
+    const content = await fs.readFile(filePath, `utf8`);
+    return content.trim().split(`\n`);
+  } catch (err) {
+    console.error(chalk.red(`Error read file: ${filePath} ${err.message}`));
+    return [];
+  }
+};
+
 module.exports.writeJsonFile = async (fileName, data) => {
   try {
     const jsonStr = JSON.stringify(data);
     await fs.writeFile(fileName, jsonStr);
     console.info(chalk.green(`Operation success. File created.`));
   } catch (err) {
-    console.error(`Error write file: ${fileName} ${err.message}`);
+    console.error(chalk.red(`Error write file: ${fileName} ${err.message}`));
     throw new Error(`Can't write data to file...`);
   }
 };
