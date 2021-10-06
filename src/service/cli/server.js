@@ -64,4 +64,4 @@ module.exports = {
       console.error(chalk.red(`Ошибка при создании сервера: ${message}`));
     });
   }
-}
+};
