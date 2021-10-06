@@ -5,8 +5,8 @@ const http = require(`http`);
 const fs = require(`fs`).promises;
 
 const {
-    HttpCode
-  } = require(`../constants`);
+  HttpCode
+} = require(`../../constants`);
 
 const DEFAULT_PORT = 3000;
 const FILENAME = `mocks.json`;
@@ -35,6 +35,7 @@ const onClientConnect = async (req, res) => {
     case `/`:
       try {
         const fileContent = await fs.readFile(FILENAME);
+        console.log(fileContent);
         const mocks = JSON.parse(fileContent);
         const message = mocks.map((publication) => `<li>${publication.title}</li>`).join(``);
         sendResponse(res, HttpCode.OK, `<ul>${message}</ul>`);
@@ -57,7 +58,7 @@ module.exports = {
 
     http.createServer(onClientConnect)
     .listen(port)
-    .on(`listening`, (err) => {
+    .on(`listening`, () => {
       console.info(chalk.green(`Ожидаю соединений на ${port}`));
     })
     .on(`error`, ({message}) => {
