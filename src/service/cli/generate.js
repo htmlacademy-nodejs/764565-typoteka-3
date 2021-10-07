@@ -9,9 +9,9 @@ const {
   readContentFromFile,
 } = require(`../../utils`);
 
-const FILE_SENTENCES_PATH = `../../data/sentences.txt`;
-const FILE_TITLES_PATH = `../../data/titles.txt`;
-const FILE_CATEGORIES_PATH = `../../data/categories.txt`;
+const FILE_SENTENCES_PATH = `./data/sentences.txt`;
+const FILE_TITLES_PATH = `./data/titles.txt`;
+const FILE_CATEGORIES_PATH = `./data/categories.txt`;
 
 const DEFAULT_PUBLICATIONS_COUNT = 1;
 const MAX_PUBLICATIONS_COUNT = 1000;
