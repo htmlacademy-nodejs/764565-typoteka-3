@@ -6,7 +6,7 @@
   "scripts": {
     "test": "npm run eslint",
     "eslint": "eslint --ext .js src/",
-    "start": "nodemon ./src/service/service.js --server",
+    "start": "nodemon --ext .js ./src/service/service.js",
     "start-front-server": "node ./src/express/express.js"
   },
   "repository": {
