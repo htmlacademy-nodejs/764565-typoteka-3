@@ -35,11 +35,11 @@ const onClientConnect = async (req, res) => {
     case `/`:
       try {
         const fileContent = await fs.readFile(FILENAME);
-        console.log(fileContent);
         const mocks = JSON.parse(fileContent);
         const message = mocks.map((publication) => `<li>${publication.title}</li>`).join(``);
         sendResponse(res, HttpCode.OK, `<ul>${message}</ul>`);
       } catch (err) {
+        console.error(err);
         sendResponse(res, HttpCode.NOT_FOUND, notFoundMessageText);
       }
 
