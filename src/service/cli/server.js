@@ -2,11 +2,14 @@
 
 const chalk = require(`chalk`);
 const express = require(`express`);
-const fs = require(`fs`).promises;
 
 const {
   HttpCode
 } = require(`../../constants`);
+
+const {
+  readContentFromJsonFile
+} = require(`../../utils`);
 
 const DEFAULT_PORT = 3000;
 const FILENAME = `mocks.json`;
@@ -16,10 +19,9 @@ app.use(express.json());
 
 app.get(`/posts`, async (req, res) => {
   try {
-    const fileContent = await fs.readFile(FILENAME);
-    const mocks = JSON.parse(fileContent);
+    const mocks = await readContentFromJsonFile(FILENAME);
     res.json(mocks);
-  } catch (_err) {
+  } catch (err) {
     res.send([]);
   }
 });
