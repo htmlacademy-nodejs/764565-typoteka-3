@@ -1,0 +1,15 @@
+doctype html
+.wrapper
+  head
+    meta(charset='utf-8')
+    meta(name='viewport' content='width=device-width,initial-scale=1')
+    meta(name='description' content='Личный блог Типотека')
+    meta(http-equiv='X-UA-Compatible' content='ie=edge')
+    title Типотека
+    link(rel='stylesheet' href='/css/style.min.css')
+  body
+    include partials/header.pug
+    block content
+    include partials/footer.pug
+    script(src="/nodejs/3/js/vendor.js")
+    script(src="/nodejs/3/js/main.js")
