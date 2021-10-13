@@ -2,7 +2,7 @@
 
 const chalk = require(`chalk`);
 const express = require(`express`);
-const routes = require(`../api`);
+const routes = require(`../api/index.route`);
 
 const {HttpCode, API_PREFIX} = require(`../../constants`);
 

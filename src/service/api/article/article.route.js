@@ -1,10 +1,10 @@
 'use strict';
 
 const {Router} = require(`express`);
-const {HttpCode} = require(`../../constants`);
-const articleValidator = require(`../middlewares/article-validator`);
-const articleExist = require(`../middlewares/article-exists`);
-const commentValidator = require(`../middlewares/comment-validator`);
+const {HttpCode} = require(`../../../constants`);
+const articleValidator = require(`../../middlewares/article-validator`);
+const articleExist = require(`../../middlewares/article-exists`);
+const commentValidator = require(`../../middlewares/comment-validator`);
 
 const route = new Router();
 
@@ -18,16 +18,15 @@ module.exports = (app, articleService, commentService) => {
   });
 
   route.get(`/:articleId`, async (req, res) => {
-    const {atricleId} = req.params;
-    const atricle = await articleService.findOne(atricleId);
-
-    if (!atricle) {
+    const {articleId} = req.params;
+    const article = await articleService.findOne(articleId);
+    if (article) {
+      return res.status(HttpCode.OK)
+        .json(articleId);
+    } else {
       return res.status(HttpCode.NOT_FOUND)
-        .send(`Not found with ${atricleId}`);
+      .send(`Not found with ${articleId}`);
     }
-
-    return res.status(HttpCode.OK)
-      .json(atricleId);
   });
 
   route.post(`/`, articleValidator, async (req, res) => {
@@ -41,28 +40,29 @@ module.exports = (app, articleService, commentService) => {
     const {articleId} = req.params;
     const existArticle = await articleService.findOne(articleId);
 
-    if (!existArticle) {
+    if (existArticle) {
+      res.status(HttpCode.OK)
+        .json(existArticle);
+      const updatedArticle = await articleService.update(articleId, req.body);
+      return res.status(HttpCode.OK)
+        .json(updatedArticle);
+    } else {
       return res.status(HttpCode.NOT_FOUND)
         .send(`Not found with ${articleId}`);
     }
-
-    const updatedArticle = await articleService.update(articleId, req.body);
-
-    return res.status(HttpCode.OK)
-      .json(updatedArticle);
   });
 
   route.delete(`/:articleId`, async (req, res) => {
     const {articleId} = req.params;
     const article = await articleService.drop(articleId);
 
-    if (!article) {
+    if (article) {
+      return res.status(HttpCode.OK)
+        .json(article);
+    } else {
       return res.status(HttpCode.NOT_FOUND)
         .send(`Not found`);
     }
-
-    return res.status(HttpCode.OK)
-      .json(article);
   });
 
   route.get(`/:articleId/comments`, articleExist(articleService), async (req, res) => {
@@ -78,13 +78,13 @@ module.exports = (app, articleService, commentService) => {
     const {commentId} = req.params;
     const deletedComment = await commentService.drop(article, commentId);
 
-    if (!deletedComment) {
+    if (deletedComment) {
+      return res.status(HttpCode.OK)
+        .json(deletedComment);
+    } else {
       return res.status(HttpCode.NOT_FOUND)
-        .send(`Not found`);
+      .send(`Not found`);
     }
-
-    return res.status(HttpCode.OK)
-      .json(deletedComment);
   });
 
   route.post(`/:articleId/comments`, [articleExist(articleService), commentValidator], async (req, res) => {

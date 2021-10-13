@@ -6,11 +6,11 @@ module.exports = (service) => (req, res, next) => {
   const {articleId} = req.params;
   const article = service.findOne(articleId);
 
-  if (!article) {
+  if (article) {
+    res.locals.article = article;
+    return next();
+  } else {
     return res.status(HttpCode.NOT_FOUND)
       .send(`Article with ${articleId} not found`);
   }
-
-  res.locals.article = article;
-  return next();
 };

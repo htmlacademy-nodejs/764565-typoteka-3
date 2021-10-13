@@ -45,7 +45,7 @@ const generateRandomFullText = (sentences) => {
 };
 
 const generateRandomCategory = (categories) => {
-  return categories[getRandomInt(0, categories.length - 1)];
+  return shuffle(categories).slice(0, getRandomInt(0, categories.length - 1));
 };
 
 const generateRandomComments = (comments) => {
