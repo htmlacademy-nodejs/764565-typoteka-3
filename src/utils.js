@@ -29,6 +29,16 @@ module.exports.readContentFromFile = async (filePath) => {
   }
 };
 
+module.exports.readContentFromJsonFile = async (fileName) => {
+  try {
+    const fileContent = await fs.readFile(fileName);
+    return JSON.parse(fileContent);
+  } catch (err) {
+    console.error(chalk.red(`Error read file: ${fileName} ${err.message}`));
+    throw new Error(`Can't read data from file...`);
+  }
+};
+
 module.exports.writeJsonFile = async (fileName, data) => {
   try {
     const jsonStr = JSON.stringify(data);
