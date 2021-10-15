@@ -8,6 +8,7 @@ module.exports = (service) => (req, res, next) => {
 
   if (article) {
     res.locals.article = article;
+
     return next();
   } else {
     return res.status(HttpCode.NOT_FOUND)
