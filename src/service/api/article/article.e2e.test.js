@@ -56,11 +56,12 @@ const mockData = [
   }
 ];
 
-const createAPI = () => {
+const cloneData = JSON.parse(JSON.stringify(mockData));
+
+const createAPI = (services = [new DataService(cloneData), new CommentService()]) => {
   const app = express();
-  const cloneData = JSON.parse(JSON.stringify(mockData));
   app.use(express.json());
-  article(app, new DataService(cloneData), new CommentService());
+  article(app, ...services);
   return app;
 };
 
@@ -96,128 +97,158 @@ describe(`API returns an article with given id`, () => {
 
 });
 
-describe(`API creates an article if data is valid`, () => {
+describe(`API creates an article`, () => {
+  describe(`API creates an article if data is valid`, () => {
 
-  const newArticle = {
-    title: `Влияние воды на людей`,
-    announce: `Это революционный взгляд на жизнь и на людей`,
-    fullText: `Таких масштабных экспериментов ещё не было! Научный мир до сих пор спорит и полученных результатах`,
-    category: `Наука`
-  };
-  const app = createAPI();
-  let response;
+    const newArticle = {
+      title: `Влияние воды на людей`,
+      announce: `Это революционный взгляд на жизнь и на людей`,
+      fullText: `Таких масштабных экспериментов ещё не было! Научный мир до сих пор спорит и полученных результатах`,
+      category: `Наука`
+    };
 
-  beforeAll(async () => {
-    response = await request(app)
-      .post(`/articles`)
-      .send(newArticle);
-  });
+    const dataService = new DataService(cloneData);
+    const commentService = new CommentService();
+    const app = createAPI([dataService, commentService]);
+    let response;
 
-  test(`Status code 201`, () => expect(response.statusCode).toBe(HttpCode.CREATED));
-  test(`Returns article created`, () => expect(response.body).toEqual(expect.objectContaining(newArticle)));
-  test(`Article count is changed`, () => request(app)
-    .get(`/articles`)
-    .expect((res) => expect(res.body.length).toBe(3))
-  );
-
-});
-
-describe(`API refuses to create an article if data is invalid`, () => {
-  const newArticle = {
-    title: `Влияние воды на людей`,
-    announce: `Это революционный взгляд на жизнь и на людей`,
-    fullText: `Таких масштабных экспериментов ещё не было! Научный мир до сих пор спорит и полученных результатах`,
-    category: `Наука`
-  };
-
-  const app = createAPI();
-
-  test(`Without any required property response code is 400`, async () => {
-    for (const key of Object.keys(newArticle)) {
-      const badArticle = {...newArticle};
-      delete badArticle[key];
-      await request(app)
+    beforeAll(async () => {
+      response = await request(app)
         .post(`/articles`)
-        .send(badArticle)
+        .send(newArticle);
+    });
+
+    test(`Status code 201`, () => expect(response.statusCode).toBe(HttpCode.CREATED));
+    test(`Returns article created`, () => expect(response.body).toEqual(expect.objectContaining(newArticle)));
+    test(`Article's id is defined`, () => expect(response.body.id).toBeDefined());
+    test(`Article's data match`, () => {
+      expect(dataService.findOne(response.body.id)).toMatchObject({
+        title: `Влияние воды на людей`,
+        announce: `Это революционный взгляд на жизнь и на людей`,
+        fullText: `Таких масштабных экспериментов ещё не было! Научный мир до сих пор спорит и полученных результатах`,
+        category: `Наука`
+      }
+      );
+    });
+  });
+
+  describe(`API refuses to create an article if data is invalid`, () => {
+    const newArticle = {
+      title: `Влияние воды на людей`,
+      announce: `Это революционный взгляд на жизнь и на людей`,
+      fullText: `Таких масштабных экспериментов ещё не было! Научный мир до сих пор спорит и полученных результатах`,
+      category: `Наука`
+    };
+
+    const app = createAPI();
+
+    test(`Without any required property response code is 400`, async () => {
+      for (const key of Object.keys(newArticle)) {
+        const badArticle = {...newArticle};
+        delete badArticle[key];
+        await request(app)
+          .post(`/articles`)
+          .send(badArticle)
+          .expect(HttpCode.BAD_REQUEST);
+      }
+    });
+  });
+});
+
+describe(`API changes article`, () => {
+  describe(`API changes existent article`, () => {
+    const newArticle = {
+      title: `Влияние воды на людей`,
+      announce: `Это революционный взгляд на жизнь и на людей`,
+      fullText: `Таких масштабных экспериментов ещё не было! Научный мир до сих пор спорит и полученных результатах`,
+      category: `Наука`
+    };
+
+    const dataService = new DataService(cloneData);
+    const commentService = new CommentService();
+    const app = createAPI([dataService, commentService]);
+
+    let response;
+
+    beforeAll(async () => {
+      response = await request(app)
+        .put(`/articles/CFDzl8`)
+        .send(newArticle);
+    });
+
+    test(`Status code 200`, () => expect(response.statusCode).toBe(HttpCode.OK));
+    test(`Returns changed article`, () => expect(response.body).toEqual(expect.objectContaining(newArticle)));
+    test(`Article is really changed`, () => {
+      expect((dataService.findOne(response.body.id)).title).toBe(`Влияние воды на людей`);
+    });
+  });
+
+  describe(`API returns status code 404 when trying to change non-existent article`, () => {
+    const app = createAPI();
+
+    const validArticle = {
+      title: `Это`,
+      announce: `новая`,
+      fullText: `валидная`,
+      category: `статья`
+    };
+
+    test(`API returns status code 404`, () => {
+      return request(app)
+        .put(`/articles/NOEXST`)
+        .send(validArticle)
+        .expect(HttpCode.NOT_FOUND);
+    });
+  });
+
+  describe(`API returns status code 400 when trying to change an article with invalid data`, () => {
+    const app = createAPI();
+
+    const invalidArticle = {
+      title: `Это`,
+      announce: `невалидно`,
+      fullText: `нет category`,
+    };
+    test(`API returns status code 400`, () => {
+      return request(app)
+        .put(`/articles/NOEXST`)
+        .send(invalidArticle)
         .expect(HttpCode.BAD_REQUEST);
-    }
+    });
+
+  });
+
+});
+
+describe(`API deletes an article`, () => {
+  describe(`API correctly deletes an article`, () => {
+    const dataService = new DataService(cloneData);
+    const commentService = new CommentService();
+    const app = createAPI([dataService, commentService]);
+
+    let response;
+
+    beforeAll(async () => {
+      response = await request(app)
+        .delete(`/articles/CFDzl8`);
+    });
+
+    test(`Status code 200`, () => expect(response.statusCode).toBe(HttpCode.OK));
+    test(`Returns deleted article`, () => expect(response.body.id).toBe(`CFDzl8`));
+    test(`Article not exists`, () => expect(dataService.findOne(response.body.id)).toBeFalsy());
+  });
+
+  describe(`API refuses to delete non-existent article`, () => {
+    const app = createAPI();
+
+    test(`API returns status code 404`, () => {
+      return request(app)
+        .delete(`/articles/NOEXST`)
+        .expect(HttpCode.NOT_FOUND);
+    });
   });
 });
 
-describe(`API changes existent article`, () => {
-  const newArticle = {
-    title: `Влияние воды на людей`,
-    announce: `Это революционный взгляд на жизнь и на людей`,
-    fullText: `Таких масштабных экспериментов ещё не было! Научный мир до сих пор спорит и полученных результатах`,
-    category: `Наука`
-  };
-
-  const app = createAPI();
-
-  let response;
-
-  beforeAll(async () => {
-    response = await request(app)
-      .put(`/articles/CFDzl8`)
-      .send(newArticle);
-  });
-
-  test(`Status code 200`, () => expect(response.statusCode).toBe(HttpCode.OK));
-  test(`Returns changed article`, () => expect(response.body).toEqual(expect.objectContaining(newArticle)));
-  test(`Article is really changed`, () => request(app)
-    .get(`/articles/CFDzl8`)
-    .expect((res) => expect(res.body.title).toBe(`Влияние воды на людей`))
-  );
-});
-
-test(`API returns status code 404 when trying to change non-existent article`, () => {
-  const app = createAPI();
-
-  const validArticle = {
-    title: `Это`,
-    announce: `новая`,
-    fullText: `валидная`,
-    category: `статья`
-  };
-
-  return request(app)
-    .put(`/articles/NOEXST`)
-    .send(validArticle)
-    .expect(HttpCode.NOT_FOUND);
-});
-
-test(`API returns status code 400 when trying to change an article with invalid data`, () => {
-  const app = createAPI();
-
-  const invalidArticle = {
-    title: `Это`,
-    announce: `невалидно`,
-    fullText: `нет category`,
-  };
-
-  return request(app)
-    .put(`/articles/NOEXST`)
-    .send(invalidArticle)
-    .expect(HttpCode.BAD_REQUEST);
-});
-
-describe(`API correctly deletes an article`, () => {
-  const app = createAPI();
-
-  let response;
-
-  beforeAll(async () => {
-    response = await request(app)
-      .delete(`/articles/CFDzl8`);
-  });
-
-  test(`Status code 200`, () => expect(response.statusCode).toBe(HttpCode.OK));
-  test(`Returns deleted article`, () => expect(response.body.id).toBe(`CFDzl8`));
-  test(`Article count is 2 now`, () => request(app)
-    .get(`/articles`)
-    .expect((res) => expect(res.body.length).toBe(2))
-  );
-});
 
 describe(`API returns a list of comments to given article`, () => {
   const app = createAPI();
@@ -234,85 +265,89 @@ describe(`API returns a list of comments to given article`, () => {
   test(`First comment's id is "zmgiza"`, () => expect(response.body[0].id).toBe(`zmgiza`));
 });
 
-describe(`API creates a comment if data is valid`, () => {
-  const newComment = {
-    text: `Валидному комментарию достаточно этого поля`
-  };
-  const app = createAPI();
-  let response;
+describe(`API creates a comment`, () => {
+  describe(`API creates a comment if data is valid`, () => {
+    const newComment = {
+      text: `Валидному комментарию достаточно этого поля`
+    };
+    const dataService = new DataService(cloneData);
+    const commentService = new CommentService();
+    const app = createAPI([dataService, commentService]);
 
-  beforeAll(async () => {
-    response = await request(app)
-      .post(`/articles/RnjHT8/comments`)
-      .send(newComment);
+    let response;
+
+    beforeAll(async () => {
+      response = await request(app)
+        .post(`/articles/RnjHT8/comments`)
+        .send(newComment);
+    });
+
+    test(`Status code 201`, () => expect(response.statusCode).toBe(HttpCode.CREATED));
+    test(`Returns comment created`, () => expect(response.body).toEqual(expect.objectContaining(newComment)));
+    test(`Comments count is changed`, () => expect(commentService.findAll(dataService.findOne(`RnjHT8`)).length).toBe(3));
   });
 
-  test(`Status code 201`, () => expect(response.statusCode).toBe(HttpCode.CREATED));
-  test(`Returns comment created`, () => expect(response.body).toEqual(expect.objectContaining(newComment)));
-  test(`Comments count is changed`, () => request(app)
-    .get(`/articles/RnjHT8/comments`)
-    .expect((res) => expect(res.body.length).toBe(3))
-  );
-});
+  describe(`API refuses to create a comment when data is invalid, and returns status code 400`, () => {
+    const app = createAPI();
 
-test(`API refuses to create a comment to non-existent article and returns status code 404`, () => {
-  const app = createAPI();
-
-  return request(app)
-    .post(`/articles/NOEXST/comments`)
-    .send({
-      text: `Неважно`
-    })
-    .expect(HttpCode.NOT_FOUND);
-});
-
-test(`API refuses to create a comment when data is invalid, and returns status code 400`, () => {
-  const app = createAPI();
-
-  return request(app)
-    .post(`/articles/RnjHT8/comments`)
-    .send({})
-    .expect(HttpCode.BAD_REQUEST);
-});
-
-test(`API refuses to delete non-existent comment`, () => {
-  const app = createAPI();
-
-  return request(app)
-    .delete(`/articles/CFDzl8/comments/NOEXST`)
-    .expect(HttpCode.NOT_FOUND);
-});
-
-test(`API refuses to delete a comment to non-existent article`, () => {
-  const app = createAPI();
-
-  return request(app)
-    .delete(`/articles/NOEXST/comments/4o2MtL`)
-    .expect(HttpCode.NOT_FOUND);
-});
-
-describe(`API correctly deletes a comment`, () => {
-  const app = createAPI();
-
-  let response;
-
-  beforeAll(async () => {
-    response = await request(app)
-      .delete(`/articles/RnjHT8/comments/9nkHOd`);
+    test(`API returns status code 400`, () => {
+      return request(app)
+        .post(`/articles/RnjHT8/comments`)
+        .send({})
+        .expect(HttpCode.BAD_REQUEST);
+    });
   });
 
-  test(`Status code 200`, () => expect(response.statusCode).toBe(HttpCode.OK));
-  test(`Returns comment deleted`, () => expect(response.body.id).toBe(`9nkHOd`));
-  test(`Comments count is 2 now`, () => request(app)
-    .get(`/articles/RnjHT8/comments`)
-    .expect((res) => expect(res.body.length).toBe(2))
-  );
+  describe(`API refuses to create a comment to non-existent article and returns status code 404`, () => {
+    const app = createAPI();
+
+    test(`API returns status code 404`, () => {
+      return request(app)
+        .post(`/articles/NOEXST/comments`)
+        .send({
+          text: `Неважно`
+        })
+        .expect(HttpCode.NOT_FOUND);
+    });
+  });
 });
 
-test(`API refuses to delete non-existent article`, () => {
-  const app = createAPI();
+describe(`API refuses to delete a comment`, () => {
+  describe(`API correctly deletes a comment`, () => {
+    const dataService = new DataService(cloneData);
+    const commentService = new CommentService();
+    const app = createAPI([dataService, commentService]);
 
-  return request(app)
-    .delete(`/articles/NOEXST`)
-    .expect(HttpCode.NOT_FOUND);
+    let response;
+
+    beforeAll(async () => {
+      response = await request(app)
+        .delete(`/articles/RnjHT8/comments/9nkHOd`);
+    });
+
+    test(`Status code 200`, () => expect(response.statusCode).toBe(HttpCode.OK));
+    test(`Returns comment deleted`, () => expect(response.body.id).toBe(`9nkHOd`));
+    test(`Comment is not exists`, () => expect((commentService.drop(dataService.findOne(`RnjHT8`), `9nkHOd`))).toBeNull());
+  });
+
+  describe(`API refuses to delete non-existent comment`, () => {
+    const app = createAPI();
+
+    test(`API returns status code 404`, () => {
+      return request(app)
+        .delete(`/articles/CFDzl8/comments/NOEXST`)
+        .expect(HttpCode.NOT_FOUND);
+    });
+  });
+
+  describe(`API refuses to delete a comment to non-existent article`, () => {
+    const app = createAPI();
+
+    test(`API returns status code 404`, () => {
+      return request(app)
+        .delete(`/articles/NOEXST/comments/4o2MtL`)
+        .expect(HttpCode.NOT_FOUND);
+    });
+  });
+
 });
