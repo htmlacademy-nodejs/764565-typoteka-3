@@ -6,9 +6,9 @@ const articleValidator = require(`../../middlewares/article-validator`);
 const articleExist = require(`../../middlewares/article-exists`);
 const commentValidator = require(`../../middlewares/comment-validator`);
 
-const route = new Router();
-
 module.exports = (app, articleService, commentService) => {
+  const route = new Router();
+
   app.use(`/articles`, route);
 
   route.get(`/`, async (req, res) => {
@@ -22,7 +22,7 @@ module.exports = (app, articleService, commentService) => {
     const article = await articleService.findOne(articleId);
     if (article) {
       return res.status(HttpCode.OK)
-        .json(articleId);
+        .json(article);
     } else {
       return res.status(HttpCode.NOT_FOUND)
       .send(`Not found with ${articleId}`);
@@ -41,8 +41,6 @@ module.exports = (app, articleService, commentService) => {
     const existArticle = await articleService.findOne(articleId);
 
     if (existArticle) {
-      res.status(HttpCode.OK)
-        .json(existArticle);
       const updatedArticle = await articleService.update(articleId, req.body);
       return res.status(HttpCode.OK)
         .json(updatedArticle);
@@ -73,7 +71,7 @@ module.exports = (app, articleService, commentService) => {
       .json(comments);
   });
 
-  route.delete(`:articleId/comments/:commentId`, articleExist(articleService), async (req, res) => {
+  route.delete(`/:articleId/comments/:commentId`, articleExist(articleService), async (req, res) => {
     const {article} = res.locals;
     const {commentId} = req.params;
     const deletedComment = await commentService.drop(article, commentId);
@@ -88,8 +86,8 @@ module.exports = (app, articleService, commentService) => {
   });
 
   route.post(`/:articleId/comments`, [articleExist(articleService), commentValidator], async (req, res) => {
-    const {offer} = res.locals;
-    const comment = await commentService.create(offer, req.body);
+    const {article} = res.locals;
+    const comment = await commentService.create(article, req.body);
 
     return res.status(HttpCode.CREATED)
       .json(comment);
