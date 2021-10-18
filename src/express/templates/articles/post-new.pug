@@ -13,7 +13,7 @@ block content
                 .new-publication__date-form-division
                   .new-publication__date-block
                     label(for='new-publication-date' aria-label='Календарь')
-                    input#new-publication-date(type='text' name='date' placeholder='2019-03-21')
+                    input#new-publication-date(type='text' name='date' placeholder=(new Date()).toISOString().split('T')[0])
               button.new-publication__button.button.button--colored(type='submit') Опубликовать
             a.popup__button.button.button--popup-close(aria-label='Закрыть окно')
               | Закрыть
@@ -22,8 +22,7 @@ block content
               .form__wrapper.form__wrapper--intro
                 .form__field
                   label
-                    - var isArticleTitle = article.title
-                    input(type='text' name='title' placeholder='Заголовок' required='' value=isArticleTitle ? article.title : '' )
+                    input(type='text' name='title' placeholder='Заголовок' required='')
                 .form__field.form__field--post-image
                   label
                     input#image-name-field(type='text' name='photo' placeholder='Фотография' readonly='')
@@ -32,24 +31,11 @@ block content
                       input.visually-hidden(type='file' name='upload')
                       | Обзор
                 .new-publication__category-wrapper
-                  - var isArticleCategory = article.category
-                  if isArticleCategory
-                  each category of article.category
-                    div.new-publication__checkbox.new-publication__checkbox--auto
-                      label
-                        input.visually-hidden(type='checkbox' ) 
-                        | #{category}
                   a.new-publication__form-link.button.button--transparent(href='#') Добавить категорию
               .form__wrapper.form__wrapper--text
                 .form__field.form__field--publication-text
                   label
-                    - var isArticleAnnounce = article.announce
-                    if isArticleAnnounce
-                      textarea(rows='5' name='announcement' placeholder='Анонс публикации')
-                        | #{article.announce}
+                    textarea(rows='5' name='announcement' placeholder='Анонс публикации')
                 .form__field.form__field--publication-text
                   label
-                    - var isArticleFullText = article.fullText
-                    if isArticleFullText
-                      textarea(rows='10' name='full-text' placeholder='Полный текст публикации')
-                        | #{article.fullText}
+                    textarea(rows='10' name='full-text' placeholder='Полный текст публикации')

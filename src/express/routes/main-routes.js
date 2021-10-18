@@ -7,6 +7,11 @@ const api = require(`../api`).getAPI();
 
 mainRouter.get(`/`, async (req, res) => {
   const articles = await api.getArticles();
+
+  articles.map((element) => {
+    element.createdDate = (new Date(element.createdDate)).toLocaleString();
+  });
+
   res.render(`main`, {articles});
 });
 

@@ -20,15 +20,15 @@ class API {
     return response.data;
   }
 
-  getArticles() {
+  async getArticles() {
     return this._load(`/articles`);
   }
 
-  getArticle(id) {
+  async getArticle(id) {
     return this._load(`/articles/${id}`);
   }
 
-  search(query) {
+  async search(query) {
     return this._load(`/search`, {params: {query}});
   }
 

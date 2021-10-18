@@ -26,7 +26,7 @@ const storage = multer.diskStorage({
 const upload = multer({storage});
 
 articlesRouter.get(`/category/:id`, (req, res) => res.render(`articles-by-category`));
-articlesRouter.get(`/add`, (req, res) => res.render(`articles/post`), {});
+articlesRouter.get(`/add`, (req, res) => res.render(`articles/post-new`));
 
 articlesRouter.post(`/add`, upload.single(`avatar`), async (req, res) => {
   const {body, file} = req;
@@ -51,7 +51,7 @@ articlesRouter.get(`/edit/:id`, async (req, res) => {
     api.getArticle(id),
     api.getCategories()
   ]);
-  console.log({article});
+
   res.render(`articles/post`, {article, categories});
 });
 
