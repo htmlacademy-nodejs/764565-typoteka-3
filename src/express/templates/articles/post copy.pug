@@ -28,21 +28,18 @@ block content
                     input#image-name-field(type='text' name='photo' placeholder='Фотография' readonly='')
                   .form__image-loader.form__image-loader--publication
                     label
-                      input.visually-hidden(type='file' name='upload')
+                      input.visually-hidden(type='checkbox' name='category-1')
                       | Обзор
                 .new-publication__category-wrapper
-                  each category of article.category
+                  each category of article.categories
                     div.new-publication__checkbox.new-publication__checkbox--auto
-                      label
-                        input.visually-hidden(type='checkbox' ) 
-                        | #{category}
+                      label {category}
+                        input.visually-hidden(type='checkbox' name='category-1')
                   a.new-publication__form-link.button.button--transparent(href='#') Добавить категорию
               .form__wrapper.form__wrapper--text
                 .form__field.form__field--publication-text
                   label
-                    textarea(rows='5' name='announcement' placeholder='Анонс публикации')
-                      | #{article.announce}
+                    textarea(rows='5' name='announcement' placeholder='Анонс публикации' value=article.announce)
                 .form__field.form__field--publication-text
                   label
-                    textarea(rows='10' name='full-text' placeholder='Полный текст публикации')
-                      | #{article.fullText}
+                    textarea(rows='10' name='full-text' placeholder='Полный текст публикации' value=article.fulltext)

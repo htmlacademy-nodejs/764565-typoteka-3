@@ -22,6 +22,8 @@ const FILE_COMMENTS_PATH = `./data/comments.txt`;
 const DEFAULT_PUBLICATIONS_COUNT = 1;
 const MAX_PUBLICATIONS_COUNT = 1000;
 
+const MAX_CATEGORIES = 4;
+
 const FILE_NAME = `mocks.json`;
 
 const generateRandomId = () => {
@@ -45,7 +47,7 @@ const generateRandomFullText = (sentences) => {
 };
 
 const generateRandomCategory = (categories) => {
-  return shuffle(categories).slice(0, getRandomInt(0, categories.length - 1));
+  return shuffle(categories).slice(0, getRandomInt(0, MAX_CATEGORIES));
 };
 
 const generateRandomComments = (comments) => {
