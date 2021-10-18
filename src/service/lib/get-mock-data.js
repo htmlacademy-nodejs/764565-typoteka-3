@@ -4,6 +4,9 @@ const {
   readContentFromJsonFile,
 } = require(`../../utils`);
 
+const {getLogger} = require(`./logger`);
+const logger = getLogger({name: `api`});
+
 const FILENAME = `mocks.json`;
 let data = [];
 
@@ -15,7 +18,7 @@ const getMockData = async () => {
   try {
     data = await readContentFromJsonFile(FILENAME);
   } catch (err) {
-    console.log(err);
+    logger.error(`Route not found: ${err.message}`);
     return (err);
   }
 
