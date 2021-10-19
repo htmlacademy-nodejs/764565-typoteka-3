@@ -49,3 +49,5 @@ module.exports.writeJsonFile = async (fileName, data) => {
     throw new Error(`Can't write data to file...`);
   }
 };
+
+module.exports.ensureArray = (value) => Array.isArray(value) ? value : [value];

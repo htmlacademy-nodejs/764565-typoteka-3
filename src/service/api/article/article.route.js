@@ -12,9 +12,9 @@ module.exports = (app, articleService, commentService) => {
   app.use(`/articles`, route);
 
   route.get(`/`, async (req, res) => {
-    const categories = await articleService.findAll();
+    const articles = await articleService.findAll();
     res.status(HttpCode.OK)
-      .json(categories);
+      .json(articles);
   });
 
   route.get(`/:articleId`, async (req, res) => {

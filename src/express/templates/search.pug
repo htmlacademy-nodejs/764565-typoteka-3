@@ -10,3 +10,10 @@ block content
             label
               input(type='text' name='query' placeholder='Что ищем?')
             button.search__button.button.button--transparent(type='submit') Найти
+          - var isArticle = result
+          if isArticle  
+            each article of results
+              .search__result
+                time.search__date(datetime='') #{article.createdDate}
+                a.search__link
+                  | #{article.title} 
