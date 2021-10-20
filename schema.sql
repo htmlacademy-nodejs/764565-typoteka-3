@@ -15,17 +15,20 @@ CREATE TABLE articles(
   title varchar(255) NOT NULL,
   created_date timestamp DEFAULT current_timestamp,
   announce text NOT NULL,
-  fullText text,
-  picture varchar(50)
+  description text,
+  picture varchar(50),
+  user_id integer NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id)
 );
 CREATE TABLE comments(
   id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   article_id integer NOT NULL,
   user_id integer NOT NULL,
   text text NOT NULL,
-  created_date timestamp DEFAULT current_timestamp
+  created_date timestamp DEFAULT current_timestamp,
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (article_id) REFERENCES articles(id)
 );
-
 CREATE TABLE article_categories(
   article_id integer NOT NULL,
   category_id integer NOT NULL,
