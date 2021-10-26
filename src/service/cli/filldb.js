@@ -1,18 +1,16 @@
 'use strict';
 
 const chalk = require(`chalk`);
-const {nanoid} = require(`nanoid`);
+const {getLogger} = require(`../lib/logger`);
+const sequelize = require(`../lib/sequelize`);
+const defineModels = require(`../models`);
+const Aliase = require(`../models/aliase`);
 
 const {
   getRandomInt,
   shuffle,
-  writeJsonFile,
   readContentFromFile,
 } = require(`../../utils`);
-
-const {
-  MAX_ID_LENGTH
-} = require(`../../constants`);
 
 const FILE_SENTENCES_PATH = `./data/sentences.txt`;
 const FILE_TITLES_PATH = `./data/titles.txt`;
@@ -24,26 +22,19 @@ const MAX_PUBLICATIONS_COUNT = 1000;
 
 const MAX_CATEGORIES = 4;
 
-const FILE_NAME = `mocks.json`;
-
-const generateRandomId = () => {
-  return nanoid(MAX_ID_LENGTH);
-};
+const logger = getLogger({});
 
 const generateRandomTitle = (titles) => {
-  return titles[getRandomInt(0, titles.length - 1)];
-};
-
-const generateRandomCreatedDate = (date) => {
-  return new Date(getRandomInt(date.setMonth(date.getMonth() - 3), date));
+  console.log(titles);
+  return titles[getRandomInt(0, titles.length - 1)].replace(`\r`, ``).slice(0, 249);
 };
 
 const generateRandomAnnounce = (sentences) => {
-  return shuffle(sentences).slice(0, 4).join(` `);
+  return shuffle(sentences).slice(0, 4).join(` `).replace(`\r`, ``).slice(0, 249);
 };
 
 const generateRandomFullText = (sentences) => {
-  return shuffle(sentences).slice(0, getRandomInt(0, sentences.length - 1)).join(` `);
+  return shuffle(sentences).slice(0, getRandomInt(0, sentences.length - 1)).join(` `).replace(`\r`, ``).slice(0, 999);
 };
 
 const generateRandomCategory = (categories) => {
@@ -54,21 +45,19 @@ const generateRandomComments = (comments) => {
 
   const count = getRandomInt(1, comments.length);
   return Array(count).fill({}).map(() => ({
-    id: nanoid(MAX_ID_LENGTH),
     text: shuffle(comments)
       .slice(0, getRandomInt(1, comments.length))
-      .join(` `),
+      .join(` `)
+      .replace(`\r`, ``)
+      .slice(0, 249),
   }));
 };
 
 const generatePublications = (count, titles, categories, sentences, comments) => {
-  const currentDate = new Date();
   return Array(count).fill({}).map(() => ({
-    id: generateRandomId(),
     title: generateRandomTitle(titles),
-    createdDate: generateRandomCreatedDate(currentDate),
     announce: generateRandomAnnounce(sentences),
-    fullText: generateRandomFullText(sentences),
+    description: generateRandomFullText(sentences),
     category: generateRandomCategory(categories),
     comments: generateRandomComments(comments),
   }));
@@ -83,8 +72,17 @@ const checkCountPublicationsOverflow = (countPublications) => {
 };
 
 module.exports = {
-  name: `--generate`,
+  name: `--filldb`,
   async run(args) {
+    try {
+      logger.info(`Trying to connect to database...`);
+      await sequelize.authenticate();
+    } catch (err) {
+      logger.error(`An error occurred: ${err.message}`);
+      process.exit(1);
+    }
+    logger.info(`Connection to database established`);
+
     const [count] = args;
     const countPublications = Number.parseInt(count, 10) || DEFAULT_PUBLICATIONS_COUNT;
     try {
@@ -97,8 +95,22 @@ module.exports = {
         readContentFromFile(FILE_COMMENTS_PATH)
       ]);
 
-      const content = generatePublications(countPublications, titles, categories, sentences, comments);
-      await writeJsonFile(FILE_NAME, content);
+      const {Category, Article} = defineModels(sequelize);
+      await sequelize.sync({force: true});
+
+      const categoryModels = await Category.bulkCreate(
+          categories.map((item) => ({name: item}))
+      );
+
+      const articles = generatePublications(countPublications, titles, categoryModels, sentences, comments);
+      console.log(articles);
+
+      const articlePromises = articles.map(async (article) => {
+        const articleModel = await Article.create(article, {include: [Aliase.COMMENTS]});
+        await articleModel.addCategories(article.category);
+      });
+      await Promise.all(articlePromises);
+
     } catch (err) {
       console.log(chalk.red(err.message));
       throw err;
