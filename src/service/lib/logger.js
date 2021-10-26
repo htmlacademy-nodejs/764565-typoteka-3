@@ -3,9 +3,11 @@
 const pino = require(`pino`);
 
 const {Env} = require(`../../constants`);
+const process = require(`process`);
+
 
 const LOG_FILE = `src/service/logs/api.log`;
-const isDevMode = process.env.NODE_ENV === Env.DEVELOPMENT;
+const isDevMode = process.env.NODE_ENV !== Env.PRODUCTION;
 const defaultLogLevel = isDevMode ? `info` : `error`;
 
 const logger = pino({
