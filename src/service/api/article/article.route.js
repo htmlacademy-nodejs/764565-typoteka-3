@@ -12,9 +12,10 @@ module.exports = (app, articleService, commentService) => {
   app.use(`/articles`, route);
 
   route.get(`/`, async (req, res) => {
-    const articles = await articleService.findAll();
-    res.status(HttpCode.OK)
-      .json(articles);
+    const {comments} = req.query;
+    let articles = await articleService.findAll(comments);
+    console.log(articles);
+    res.status(HttpCode.OK).json(articles);
   });
 
   route.get(`/:articleId`, async (req, res) => {
@@ -31,7 +32,6 @@ module.exports = (app, articleService, commentService) => {
 
   route.post(`/`, articleValidator, async (req, res) => {
     const article = await articleService.create(req.body);
-
     return res.status(HttpCode.CREATED)
       .json(article);
   });

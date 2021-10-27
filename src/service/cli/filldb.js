@@ -3,8 +3,7 @@
 const chalk = require(`chalk`);
 const {getLogger} = require(`../lib/logger`);
 const sequelize = require(`../lib/sequelize`);
-const defineModels = require(`../models`);
-const Aliase = require(`../models/aliase`);
+const initDatabase = require(`../lib/init-db`);
 
 const {
   getRandomInt,
@@ -25,7 +24,6 @@ const MAX_CATEGORIES = 4;
 const logger = getLogger({});
 
 const generateRandomTitle = (titles) => {
-  console.log(titles);
   return titles[getRandomInt(0, titles.length - 1)].replace(`\r`, ``).slice(0, 249);
 };
 
@@ -38,7 +36,7 @@ const generateRandomFullText = (sentences) => {
 };
 
 const generateRandomCategory = (categories) => {
-  return shuffle(categories).slice(0, getRandomInt(0, MAX_CATEGORIES));
+  return shuffle(categories).slice(0, getRandomInt(1, MAX_CATEGORIES));
 };
 
 const generateRandomComments = (comments) => {
@@ -95,22 +93,9 @@ module.exports = {
         readContentFromFile(FILE_COMMENTS_PATH)
       ]);
 
-      const {Category, Article} = defineModels(sequelize);
-      await sequelize.sync({force: true});
-
-      const categoryModels = await Category.bulkCreate(
-          categories.map((item) => ({name: item}))
-      );
-
-      const articles = generatePublications(countPublications, titles, categoryModels, sentences, comments);
+      const articles = generatePublications(countPublications, titles, categories, sentences, comments);
       console.log(articles);
-
-      const articlePromises = articles.map(async (article) => {
-        const articleModel = await Article.create(article, {include: [Aliase.COMMENTS]});
-        await articleModel.addCategories(article.category);
-      });
-      await Promise.all(articlePromises);
-
+      return initDatabase(sequelize, {articles, categories});
     } catch (err) {
       console.log(chalk.red(err.message));
       throw err;
