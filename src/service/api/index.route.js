@@ -5,15 +5,13 @@ const category = require(`./category/category.route`);
 const article = require(`./article/article.route`);
 const search = require(`./search/search.route`);
 
-const sequelize = require(`../lib/sequelize`);
-const defineModels = require(`../models`);
+const sequelize = require(`./sequelize`);
+const defineModels = require(`./index.model`);
 
-const {
-  CategoryService,
-  SearchService,
-  ArticleService,
-  CommentService,
-} = require(`./index.service`);
+const CategoryService = require(`./category/category.service`);
+const SearchService = require(`./search/search.service`);
+const ArticleService = require(`./article/article.service`);
+const CommentService = require(`./article/comment.service`);
 
 const app = new Router();
 

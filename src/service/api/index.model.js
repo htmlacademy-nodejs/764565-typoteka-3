@@ -1,10 +1,10 @@
 'use strict';
 
 const {Model} = require(`sequelize`);
-const defineCategory = require(`./category`);
-const defineComment = require(`./comment`);
-const defineArticle = require(`./article`);
-const Aliase = require(`./aliase`);
+const defineCategory = require(`./category/category.model`);
+const defineComment = require(`./article/comment.model`);
+const defineArticle = require(`./article/article.model`);
+const Aliase = require(`./models.aliase`);
 
 class ArticleCategory extends Model {
 

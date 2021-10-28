@@ -2,7 +2,7 @@
 
 const chalk = require(`chalk`);
 const {getLogger} = require(`../lib/logger`);
-const sequelize = require(`../lib/sequelize`);
+const sequelize = require(`../api/sequelize`);
 const initDatabase = require(`../lib/init-db`);
 
 const {
@@ -24,15 +24,15 @@ const MAX_CATEGORIES = 4;
 const logger = getLogger({});
 
 const generateRandomTitle = (titles) => {
-  return titles[getRandomInt(0, titles.length - 1)].replace(`\r`, ``).slice(0, 249);
+  return titles[getRandomInt(0, titles.length - 1)].slice(0, 249);
 };
 
 const generateRandomAnnounce = (sentences) => {
-  return shuffle(sentences).slice(0, 4).join(` `).replace(`\r`, ``).slice(0, 249);
+  return shuffle(sentences).slice(0, 4).join(` `).slice(0, 249);
 };
 
 const generateRandomFullText = (sentences) => {
-  return shuffle(sentences).slice(0, getRandomInt(0, sentences.length - 1)).join(` `).replace(`\r`, ``).slice(0, 999);
+  return shuffle(sentences).slice(0, getRandomInt(0, sentences.length - 1)).join(` `).slice(0, 999);
 };
 
 const generateRandomCategory = (categories) => {

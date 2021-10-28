@@ -22,7 +22,7 @@ module.exports.shuffle = (someArray) => {
 module.exports.readContentFromFile = async (filePath) => {
   try {
     const content = await fs.readFile(filePath, `utf8`);
-    return content.trim().split(`\n`);
+    return content.trim().split(`\n`).map((item) => item.replace(`\r`, ``));
   } catch (err) {
     console.error(chalk.red(`Error read file: ${filePath} ${err.message}`));
     throw new Error(`Can't read data from file...`);

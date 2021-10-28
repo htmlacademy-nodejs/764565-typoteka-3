@@ -1,6 +1,6 @@
 'use strict';
 
-const Aliase = require(`../../models/aliase`);
+const Aliase = require(`../models.aliase`);
 
 class ArticleService {
   constructor(sequelize) {
@@ -28,7 +28,6 @@ class ArticleService {
     });
     return !!deletedRows;
   }
-
 
   findOne(id) {
     return this._Article.findByPk(id, {include: [Aliase.CATEGORIES]});
