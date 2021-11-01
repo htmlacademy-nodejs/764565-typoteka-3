@@ -2,10 +2,11 @@
 
 const {Op} = require(`sequelize`);
 const Aliase = require(`../models.aliase`);
+const ArticleModel = require(`./../article/article.model`);
 
 class SearchService {
-  constructor(sequelize) {
-    this._Article = sequelize.models.Article;
+  constructor() {
+    this._Article = ArticleModel;
   }
 
   async findAll(searchText) {

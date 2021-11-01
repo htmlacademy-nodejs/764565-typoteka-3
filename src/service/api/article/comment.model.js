@@ -1,18 +1,23 @@
 'use strict';
 
 const {DataTypes, Model} = require(`sequelize`);
-
+const sequelize = require(`../../sequelize`);
 class Comment extends Model {}
 
-const define = (sequelize) => Comment.init({
+Comment.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
   text: {
     type: DataTypes.STRING,
     allowNull: false
   }
 }, {
-  sequelize,
+  sequelize: sequelize.getInstance(),
   modelName: `Comment`,
-  tableName: `comments`
+  tableName: `comments`,
 });
 
-module.exports = define;
+module.exports = Comment;

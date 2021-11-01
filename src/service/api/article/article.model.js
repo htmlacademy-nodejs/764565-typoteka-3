@@ -1,10 +1,16 @@
 'use strict';
 
 const {DataTypes, Model} = require(`sequelize`);
+const sequelize = require(`../../sequelize`);
 
 class Article extends Model {}
 
-const define = (sequelize) => Article.init({
+module.exports = Article.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
   title: {
     type: DataTypes.STRING,
     allowNull: false
@@ -20,10 +26,11 @@ const define = (sequelize) => Article.init({
     type: DataTypes.STRING(1000)
   },
   picture: DataTypes.STRING
-}, {
-  sequelize,
+},
+{
+  sequelize: sequelize.getInstance(),
   modelName: `Article`,
-  tableName: `articles`
+  tableName: `articles`,
 });
 
-module.exports = define;
+module.exports = Article;

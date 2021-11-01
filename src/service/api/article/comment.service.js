@@ -1,9 +1,12 @@
 'use strict';
 
+const ArticleModel = require(`./article.model`);
+const CommenModel = require(`./comment.model`);
+
 class CommentService {
-  constructor(sequelize) {
-    this._Article = sequelize.models.Article;
-    this._Comment = sequelize.models.Comment;
+  constructor() {
+    this._Article = ArticleModel;
+    this._Comment = CommenModel;
   }
 
   create(articleId, comment) {
