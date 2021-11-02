@@ -1,13 +1,12 @@
 'use strict';
 
 const Sequelize = require(`sequelize`);
-const CategoryModel = require(`./category.model`);
 const Aliase = require(`../models.aliase`);
 
 class CategoryService {
   constructor(sequelize) {
-    this._Category = CategoryModel;
-    // this._ArticleCategory = sequelize.models.ArticleCategory;
+    this._Category = sequelize.models.Category;
+    this._ArticleCategory = sequelize.models.ArticleCategory;
   }
 
   async findAll(needCount) {

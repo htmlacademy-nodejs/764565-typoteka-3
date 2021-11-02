@@ -1,15 +1,12 @@
 'use strict';
 
 const Aliase = require(`../models.aliase`);
-const ArticleModel = require(`./article.model`);
-const CommentModel = require(`./comment.model`);
-const CategoryModel = require(`./../category/category.model`);
 
 class ArticleService {
-  constructor() {
-    this._Article = ArticleModel;
-    this._Comment = CommentModel;
-    this._Category = CategoryModel;
+  constructor(sequelize) {
+    this._Article = sequelize.models.Article;
+    this._Comment = sequelize.models.Comment;
+    this._Category = sequelize.models.Category;
   }
 
   async create(articleData) {
@@ -33,7 +30,7 @@ class ArticleService {
   }
 
   findOne(id) {
-    return this._Article.findByPk(id, {include: [CategoryModel]});
+    return this._Article.findByPk(id, {include: [Aliase.CATEGORIES]});
   }
 
   async findAll(needComments) {

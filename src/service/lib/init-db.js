@@ -2,14 +2,12 @@
 
 const defineModels = require(`../api/index.model`);
 const Aliase = require(`../api/models.aliase`);
-const ArticleModel = require(`./../api/article/article.model`);
-const CategoryModel = require(`./../api/category/category.model`);
-const sequelize = require(`../sequelize`);
-module.exports = async ({categories, articles}) => {
-  defineModels();
-  await sequelize.getInstance().sync({force: true});
 
-  const categoryModels = await CategoryModel.bulkCreate(
+module.exports = async (sequelize, {categories, articles}) => {
+  const {Category, Article} = defineModels(sequelize);
+  await sequelize.sync({force: true});
+
+  const categoryModels = await Category.bulkCreate(
       categories.map((item) => ({name: item}))
   );
 
@@ -19,7 +17,7 @@ module.exports = async ({categories, articles}) => {
   }), {});
 
   const articlePromises = articles.map(async (article) => {
-    const articleModel = await ArticleModel.create(article);
+    const articleModel = await Article.create(article, {include: [Aliase.COMMENTS]});
     await articleModel.addCategories(
         article.category.map(
             (name) => categoryIdByName[name]

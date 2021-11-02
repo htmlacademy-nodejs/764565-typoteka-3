@@ -2,7 +2,7 @@
 
 const chalk = require(`chalk`);
 const {getLogger} = require(`../lib/logger`);
-const sequelize = require(`../sequelize`);
+const sequelize = require(`../api/sequelize`);
 const initDatabase = require(`../lib/init-db`);
 
 const {
@@ -74,7 +74,7 @@ module.exports = {
   async run(args) {
     try {
       logger.info(`Trying to connect to database...`);
-      await sequelize.getInstance().authenticate();
+      await sequelize.authenticate();
     } catch (err) {
       logger.error(`An error occurred: ${err.message}`);
       process.exit(1);
@@ -95,7 +95,7 @@ module.exports = {
 
       const articles = generatePublications(countPublications, titles, categories, sentences, comments);
       console.log(articles);
-      return initDatabase({articles, categories});
+      return initDatabase(sequelize, {articles, categories});
     } catch (err) {
       console.log(chalk.red(err.message));
       throw err;
