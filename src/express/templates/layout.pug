@@ -7,7 +7,51 @@ doctype html
     meta(http-equiv='X-UA-Compatible' content='ie=edge')
     title Типотека
     link(rel='stylesheet' href='/css/style.min.css')
+    style.
+      a.pagination__item--active{
+        pointer-events: none;
+      }
   body
+    mixin pet(name)
+      li.pet= name
+    mixin pagination(page, totalPages, width, prefix)
+      -
+        let start = page - width;
+        let end = page + width;
+        if (start < 1) {
+          end += 1 - start;
+          start = 1;
+        }
+        if (end > totalPages) {
+          start -= end - totalPages;
+          end = totalPages;
+        }
+        if (start < 1) {
+          start = 1;
+        }
+        let i = start - 1
+
+      li= start
+      li= end
+      li= i
+      li= totalPages
+
+      .preview__toggle-wrapper
+        ul.preview__pagination.pagination
+          if (start > 1)
+            li
+              a.pagination__button.button.button--backwards(href=`${prefix}page=${page - 1}` aria-label='Страница назад') Назад
+          while i++ < end
+            if (i === page)
+              li.pagination__item.pagination__item--active
+                a(href=`${prefix}page=${i}`)= i
+            else
+              li.pagination__item
+                a(class={} href=`${prefix}page=${i}`)= i
+          if end < totalPages
+            li
+              a.pagination__button.button.button--forward(href=`${prefix}page=${page + 1}` aria-label='Страница вперед') Вперёд
+
     include partials/header.pug
     block content
     include partials/footer.pug

@@ -64,35 +64,35 @@ const createAPI = async (articleService = new DataService(mockDB), commentServic
   return app;
 };
 
-describe(`API returns a list of all articles`, () => {
-  let response;
+// describe(`API returns a list of all articles`, () => {
+//   let response;
 
-  beforeAll(async () => {
-    const app = await createAPI();
-    response = await request(app)
-      .get(`/articles`);
-  });
+//   beforeAll(async () => {
+//     const app = await createAPI();
+//     response = await request(app)
+//       .get(`/articles`);
+//   });
 
-  test(`Status code 200`, () => expect(response.statusCode).toBe(HttpCode.OK));
-  test(`Returns a list of 2 articles`, () => expect(response.body.length).toBe(2));
-  test(`First article's title equals "Самый лучший музыкальный альбом этого года"`, () => expect(response.body[0].title).toBe(`Самый лучший музыкальный альбом этого года`));
-});
+//   test(`Status code 200`, () => expect(response.statusCode).toBe(HttpCode.OK));
+//   test(`Returns a list of 2 articles`, () => expect(response.body.length).toBe(2));
+//   test(`First article's title equals "Самый лучший музыкальный альбом этого года"`, () => expect(response.body[0].title).toBe(`Самый лучший музыкальный альбом этого года`));
+// });
 
-describe(`API returns an article with given id`, () => {
-  let response;
+// describe(`API returns an article with given id`, () => {
+//   let response;
 
-  beforeAll(async () => {
-    const app = await createAPI();
-    response = await request(app)
-      .get(`/articles/1`);
-  });
+//   beforeAll(async () => {
+//     const app = await createAPI();
+//     response = await request(app)
+//       .get(`/articles/1`);
+//   });
 
-  test(`Status code 200`, () => expect(response.statusCode).toBe(HttpCode.OK));
-  test(`Article's title is "Рок — это протест"`, () => expect(response.body.title).toBe(`Рок — это протест`));
+//   test(`Status code 200`, () => expect(response.statusCode).toBe(HttpCode.OK));
+//   test(`Article's title is "Рок — это протест"`, () => expect(response.body.title).toBe(`Рок — это протест`));
 
-});
+// });
 
-describe.only(`API creates an article`, () => {
+describe(`API creates an article`, () => {
   describe(`API creates an article if data is valid`, () => {
 
     const newArticle = {
