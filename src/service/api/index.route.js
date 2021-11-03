@@ -5,23 +5,22 @@ const category = require(`./category/category.route`);
 const article = require(`./article/article.route`);
 const search = require(`./search/search.route`);
 
-const getMockData = require(`../lib/get-mock-data`);
+const sequelize = require(`./sequelize`);
+const defineModels = require(`./index.model`);
 
-const {
-  CategoryService,
-  SearchService,
-  ArticleService,
-  CommentService,
-} = require(`./index.service`);
+const CategoryService = require(`./category/category.service`);
+const SearchService = require(`./search/search.service`);
+const ArticleService = require(`./article/article.service`);
+const CommentService = require(`./article/comment.service`);
 
 const app = new Router();
 
-(async () => {
-  const mockData = await getMockData();
+defineModels(sequelize);
 
-  category(app, new CategoryService(mockData));
-  search(app, new SearchService(mockData));
-  article(app, new ArticleService(mockData), new CommentService());
+(() => {
+  category(app, new CategoryService(sequelize));
+  search(app, new SearchService(sequelize));
+  article(app, new ArticleService(sequelize), new CommentService(sequelize));
 })();
 
 module.exports = app;
