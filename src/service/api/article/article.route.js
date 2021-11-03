@@ -12,9 +12,10 @@ module.exports = (app, articleService, commentService) => {
   app.use(`/articles`, route);
 
   route.get(`/`, async (req, res) => {
-    const articles = await articleService.findAll();
-    res.status(HttpCode.OK)
-      .json(articles);
+    const {comments} = req.query;
+    let articles = await articleService.findAll(comments);
+
+    res.status(HttpCode.OK).json(articles);
   });
 
   route.get(`/:articleId`, async (req, res) => {
@@ -31,7 +32,6 @@ module.exports = (app, articleService, commentService) => {
 
   route.post(`/`, articleValidator, async (req, res) => {
     const article = await articleService.create(req.body);
-
     return res.status(HttpCode.CREATED)
       .json(article);
   });
@@ -64,21 +64,20 @@ module.exports = (app, articleService, commentService) => {
   });
 
   route.get(`/:articleId/comments`, articleExist(articleService), async (req, res) => {
-    const {article} = res.locals;
-    const comments = await commentService.findAll(article);
+    const {articleId} = req.params;
+    const comments = await commentService.findAll(articleId);
 
     res.status(HttpCode.OK)
       .json(comments);
   });
 
   route.delete(`/:articleId/comments/:commentId`, articleExist(articleService), async (req, res) => {
-    const {article} = res.locals;
     const {commentId} = req.params;
-    const deletedComment = await commentService.drop(article, commentId);
-
-    if (deletedComment) {
+    const deleted = await commentService.drop(commentId);
+    console.log(deleted);
+    if (deleted) {
       return res.status(HttpCode.OK)
-        .json(deletedComment);
+        .json(deleted);
     } else {
       return res.status(HttpCode.NOT_FOUND)
       .send(`Not found`);
@@ -86,8 +85,8 @@ module.exports = (app, articleService, commentService) => {
   });
 
   route.post(`/:articleId/comments`, [articleExist(articleService), commentValidator], async (req, res) => {
-    const {article} = res.locals;
-    const comment = await commentService.create(article, req.body);
+    const {articleId} = req.params;
+    const comment = commentService.create(articleId, req.body);
 
     return res.status(HttpCode.CREATED)
       .json(comment);

@@ -3,7 +3,7 @@
 const express = require(`express`);
 const routes = require(`../api/index.route`);
 const {getLogger} = require(`../lib/logger`);
-const sequelize = require(`../lib/sequelize`);
+const sequelize = require(`../api/sequelize`);
 
 const {HttpCode, API_PREFIX} = require(`../../constants`);
 
