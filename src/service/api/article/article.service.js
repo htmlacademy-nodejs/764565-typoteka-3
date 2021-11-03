@@ -50,11 +50,17 @@ class ArticleService {
     return articles.map((item) => item.get());
   }
 
-  async findPage({limit, offset}) {
+  async findPage({limit, offset, comments}) {
+    const include = [Aliase.CATEGORIES];
+
+    if (comments) {
+      include.push(Aliase.COMMENTS);
+    }
+
     const {count, rows} = await this._Article.findAndCountAll({
       limit,
       offset,
-      include: [Aliase.CATEGORIES],
+      include,
       order: [
         [`createdAt`, `DESC`]
       ],

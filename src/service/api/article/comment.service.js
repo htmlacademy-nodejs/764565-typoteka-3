@@ -17,9 +17,6 @@ class CommentService {
     const deletedRows = await this._Comment.destroy({
       where: {id}
     });
-    console.log(deletedRows);
-    console.log(!deletedRows);
-    console.log(!!deletedRows);
     return !!deletedRows;
   }
 

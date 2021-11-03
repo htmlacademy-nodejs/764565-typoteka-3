@@ -1,3 +1,4 @@
+/*eslint max-nested-callbacks: ["error", 10]*/
 'use strict';
 
 const express = require(`express`);
@@ -57,7 +58,6 @@ const mockArticles = [
 const mockDB = new Sequelize(`sqlite::memory:`, {logging: false});
 
 const createAPI = async (articleService = new DataService(mockDB), commentService = new CommentService(mockDB)) => {
-  await initDB(mockDB, {categories: mockCategories, articles: mockArticles});
   const app = express();
   app.use(express.json());
   article(app, articleService, commentService);
@@ -92,66 +92,76 @@ const createAPI = async (articleService = new DataService(mockDB), commentServic
 
 // });
 
-describe(`API creates an article`, () => {
-  describe(`API creates an article if data is valid`, () => {
-
-    const newArticle = {
-      title: `Рок — это протест`,
-      announce: `Это революционный взгляд на жизнь и на людей`,
-      category: [1],
-      fullText: `Таких масштабных экспериментов ещё не было! Научный мир до сих пор спорит и полученных результатах`
-    };
-
-    let app;
-    let response;
-
-    let dataService;
-
-    beforeAll(async () => {
-      dataService = new DataService(mockDB);
-      app = await createAPI(dataService);
-      response = await request(app)
-        .post(`/articles`)
-        .send(newArticle);
-    });
-
-
-    test(`Status code 201`, async () => await expect(response.statusCode).toBe(HttpCode.CREATED));
-    test(`Article's id is defined`, () => expect(response.body.id).toBeDefined());
-    test(`Article's data match`, async () => {
-      await expect(dataService.findOne(response.body.id)).resolves.toMatchObject({
-        title: `Рок — это протест`
-      }
-      );
-    });
+describe(``, () => {
+  beforeEach(async () => {
+    const mockDB = new Sequelize(`sqlite::memory:`, {logging: false});
+    await initDB(mockDB, {categories: mockCategories, articles: mockArticles});
   });
 
-  describe(`API refuses to create an article if data is invalid`, () => {
-    const newArticle = {
-      title: `Рок — это протест`,
-      announce: `Это революционный взгляд на жизнь и на людей`,
-      fullText: `Таких масштабных экспериментов ещё не было! Научный мир до сих пор спорит и полученных результатах`,
-      category: [1, 2]
-    };
+  describe(`API creates an article`, () => {
+    describe(`API creates an article if data is valid`, () => {
 
-    let app;
+      const newArticle = {
+        title: `Рок — это протест`,
+        announce: `Это революционный взгляд на жизнь и на людей`,
+        category: [1],
+        fullText: `Таких масштабных экспериментов ещё не было! Научный мир до сих пор спорит и полученных результатах`
+      };
 
-    beforeAll(async () => {
-      app = await createAPI();
-    });
+      let app;
+      let response;
+ 
+      let dataService;
 
-    test(`Without any required property response code is 400`, async () => {
-      for (const key of Object.keys(newArticle)) {
-        const badArticle = {...newArticle};
-        delete badArticle[key];
-        await request(app)
+      beforeAll(async () => {
+        dataService = new DataService(mockDB);
+        app = await createAPI(dataService);
+        response = await request(app)
           .post(`/articles`)
-          .send(badArticle)
-          .expect(HttpCode.BAD_REQUEST);
-      }
+          .send(newArticle);
+      });
+  
+  
+      test(`Status code 201`, async () => await expect(response.statusCode).toBe(HttpCode.CREATED));
+      test(`Article's id is defined`, () => expect(response.body.id).toBeDefined());
+      test(`Article's data match`, async () => {
+        await expect(dataService.findOne(response.body.id)).resolves.toMatchObject({
+          title: `Рок — это протест`
+        }
+        );
+      });
+    });
+  
+    describe(`API refuses to create an article if data is invalid`, () => {
+      const newArticle = {
+        title: `Рок — это протест`,
+        announce: `Это революционный взгляд на жизнь и на людей`,
+        fullText: `Таких масштабных экспериментов ещё не было! Научный мир до сих пор спорит и полученных результатах`,
+        category: [1, 2]
+      };
+  
+      let app;
+  
+      beforeAll(async () => {
+        app = await createAPI();
+      });
+  
+      test(`Without any required property response code is 400`, async () => {
+        for (const key of Object.keys(newArticle)) {
+          const badArticle = {...newArticle};
+          delete badArticle[key];
+          await request(app)
+            .post(`/articles`)
+            .send(badArticle)
+            .expect(HttpCode.BAD_REQUEST);
+        }
+      });
     });
   });
+
 });
+
+
 
 // describe(`API changes article`, () => {
 //   describe(`API changes existent article`, () => {
