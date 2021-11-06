@@ -19,7 +19,7 @@ mainRouter.get(`/`, async (req, res) => {
     {count, articles},
     categories
   ] = await Promise.all([
-    api.getArticles({limit, offset, comments: true}),
+    api.getArticles({limit, offset, needComments: true}),
     api.getCategories(true)
   ]);
 

@@ -33,27 +33,10 @@ class ArticleService {
     return this._Article.findByPk(id, {include: [Aliase.CATEGORIES]});
   }
 
-  async findAll(needComments) {
+  async findAll({limit, offset, needComments}) {
     const include = [Aliase.CATEGORIES];
 
     if (needComments) {
-      include.push(Aliase.COMMENTS);
-    }
-
-    const articles = await this._Article.findAll({
-      include,
-      order: [
-        [`createdAt`, `DESC`]
-      ]
-    });
-
-    return articles.map((item) => item.get());
-  }
-
-  async findPage({limit, offset, comments}) {
-    const include = [Aliase.CATEGORIES];
-
-    if (comments) {
       include.push(Aliase.COMMENTS);
     }
 

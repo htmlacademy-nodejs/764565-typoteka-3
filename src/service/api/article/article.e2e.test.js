@@ -87,8 +87,8 @@ describe(`API returns a list of all articles`, () => {
   });
 
   test(`Status code 200`, () => expect(response.statusCode).toBe(HttpCode.OK));
-  test(`Returns a list of 2 articles`, () => expect(response.body.length).toBe(2));
-  test(`First article's title equals "Самый лучший музыкальный альбом этого года"`, () => expect(response.body[0].title).toBe(`Самый лучший музыкальный альбом этого года`));
+  test(`Returns a list of 2 articles`, () => expect(response.body.articles.length).toBe(2));
+  test(`First article's title equals "Самый лучший музыкальный альбом этого года"`, () => expect(response.body.articles[0].title).toBe(`Самый лучший музыкальный альбом этого года`));
 });
 
 describe(`API returns an article with given id`, () => {
