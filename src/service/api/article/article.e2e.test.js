@@ -1,3 +1,4 @@
+/* eslint-disable max-nested-callbacks */
 'use strict';
 
 const express = require(`express`);
@@ -54,15 +55,27 @@ const mockArticles = [
   }
 ];
 
-const mockDB = new Sequelize(`sqlite::memory:`, {logging: false});
 
-const createAPI = async (articleService = new DataService(mockDB), commentService = new CommentService(mockDB)) => {
-  await initDB(mockDB, {categories: mockCategories, articles: mockArticles});
+const getInstanceDb = async () => {
+  const db = new Sequelize(`sqlite::memory:`, {logging: false});
+  await initDB(db, {categories: mockCategories, articles: mockArticles});
+  return db;
+};
+
+const createAPI = async (articleService = null, commentService = null) => {
+  if (!articleService || !commentService) {
+    const mockDb = await getInstanceDb();
+
+    articleService = articleService ? articleService : new DataService(mockDb);
+    commentService = commentService ? commentService : new CommentService(mockDb);
+  }
+
   const app = express();
   app.use(express.json());
   article(app, articleService, commentService);
   return app;
 };
+
 
 describe(`API returns a list of all articles`, () => {
   let response;
@@ -74,8 +87,8 @@ describe(`API returns a list of all articles`, () => {
   });
 
   test(`Status code 200`, () => expect(response.statusCode).toBe(HttpCode.OK));
-  test(`Returns a list of 2 articles`, () => expect(response.body.length).toBe(2));
-  test(`First article's title equals "Самый лучший музыкальный альбом этого года"`, () => expect(response.body[0].title).toBe(`Самый лучший музыкальный альбом этого года`));
+  test(`Returns a list of 2 articles`, () => expect(response.body.articles.length).toBe(2));
+  test(`First article's title equals "Самый лучший музыкальный альбом этого года"`, () => expect(response.body.articles[0].title).toBe(`Самый лучший музыкальный альбом этого года`));
 });
 
 describe(`API returns an article with given id`, () => {
@@ -92,7 +105,7 @@ describe(`API returns an article with given id`, () => {
 
 });
 
-describe.only(`API creates an article`, () => {
+describe(`API creates an article`, () => {
   describe(`API creates an article if data is valid`, () => {
 
     const newArticle = {
@@ -108,7 +121,8 @@ describe.only(`API creates an article`, () => {
     let dataService;
 
     beforeAll(async () => {
-      dataService = new DataService(mockDB);
+      const mockDb = await getInstanceDb();
+      dataService = new DataService(mockDb);
       app = await createAPI(dataService);
       response = await request(app)
         .post(`/articles`)
@@ -116,7 +130,7 @@ describe.only(`API creates an article`, () => {
     });
 
 
-    test(`Status code 201`, async () => await expect(response.statusCode).toBe(HttpCode.CREATED));
+    test(`Status code 201`, () => expect(response.statusCode).toBe(HttpCode.CREATED));
     test(`Article's id is defined`, () => expect(response.body.id).toBeDefined());
     test(`Article's data match`, async () => {
       await expect(dataService.findOne(response.body.id)).resolves.toMatchObject({
@@ -153,226 +167,233 @@ describe.only(`API creates an article`, () => {
   });
 });
 
-// describe(`API changes article`, () => {
-//   describe(`API changes existent article`, () => {
-//     const newArticle = {
-//       title: `Музыка жизни`,
-//       announce: `Это революционный взгляд на жизнь и на людей`,
-//       fullText: `Таких масштабных экспериментов ещё не было! Научный мир до сих пор спорит и полученных результатах`,
-//       category: [1, 2]
-//     };
+describe(`API changes article`, () => {
+  describe(`API changes existent article`, () => {
+    const newArticle = {
+      title: `Музыка жизни`,
+      announce: `Это революционный взгляд на жизнь и на людей`,
+      fullText: `Таких масштабных экспериментов ещё не было! Научный мир до сих пор спорит и полученных результатах`,
+      category: [1, 2]
+    };
 
-//     let app;
-//     let response;
+    let app;
+    let response;
+    let dataService;
 
-//     beforeAll(async () => {
-//       app = await createAPI();
-//       response = await request(app)
-//         .put(`/articles/1`)
-//         .send(newArticle);
-//     });
+    beforeAll(async () => {
+      const mockDb = await getInstanceDb();
+      dataService = new DataService(mockDb);
+      app = await createAPI(dataService);
+      response = await request(app)
+        .put(`/articles/1`)
+        .send(newArticle);
+    });
 
-//     test(`Status code 200`, () => expect(response.statusCode).toBe(HttpCode.OK));
-//     test(`Returns changed article`, () => expect(response.body).toBeTruthy());
-//     /*test(`Article is really changed`, () => {
-//       expect((dataService.findOne(response.body.id)).title).toBe(`Влияние воды на людей`);
-//     });*/
-//   });
+    test(`Status code 200`, () => expect(response.statusCode).toBe(HttpCode.OK));
+    test(`Returns changed article`, () => expect(response.body).toBeTruthy());
+    test(`Article is really changed`, async () => {
+      await expect(dataService.findOne(1)).resolves.toMatchObject({title: `Музыка жизни`});
+    });
+  });
 
-//   describe(`API returns status code 404 when trying to change non-existent article`, () => {
-//     const validArticle = {
-//       title: `Это`,
-//       announce: `новая`,
-//       fullText: `валидная`,
-//       category: [2]
-//     };
+  describe(`API returns status code 404 when trying to change non-existent article`, () => {
+    const validArticle = {
+      title: `Это`,
+      announce: `новая`,
+      fullText: `валидная`,
+      category: [2]
+    };
 
-//     let app;
+    let app;
 
-//     beforeAll(async () => {
-//       app = await createAPI();
-//     });
+    beforeAll(async () => {
+      app = await createAPI();
+    });
 
-//     test(`API returns status code 404`, () => {
-//       return request(app)
-//         .put(`/articles/150`)
-//         .send(validArticle)
-//         .expect(HttpCode.NOT_FOUND);
-//     });
-//   });
+    test(`API returns status code 404`, () => {
+      return request(app)
+        .put(`/articles/150`)
+        .send(validArticle)
+        .expect(HttpCode.NOT_FOUND);
+    });
+  });
 
-//   describe(`API returns status code 400 when trying to change an article with invalid data`, () => {
-//     const invalidArticle = {
-//       title: `Это`,
-//       announce: `невалидно`,
-//       fullText: `нет category`,
-//     };
+  describe(`API returns status code 400 when trying to change an article with invalid data`, () => {
+    const invalidArticle = {
+      title: `Это`,
+      announce: `невалидно`,
+      fullText: `нет category`,
+    };
 
-//     let app;
+    let app;
 
-//     beforeAll(async () => {
-//       app = await createAPI();
-//     });
+    beforeAll(async () => {
+      app = await createAPI();
+    });
 
-//     test(`API returns status code 400`, () => {
-//       return request(app)
-//         .put(`/articles/100`)
-//         .send(invalidArticle)
-//         .expect(HttpCode.BAD_REQUEST);
-//     });
+    test(`API returns status code 400`, () => {
+      return request(app)
+        .put(`/articles/100`)
+        .send(invalidArticle)
+        .expect(HttpCode.BAD_REQUEST);
+    });
+  });
+});
 
-//   });
+describe(`API deletes an article`, () => {
+  describe(`API correctly deletes an article`, () => {
+    let app;
+    let response;
+    let dataService;
 
-// });
+    beforeAll(async () => {
+      const mockDb = await getInstanceDb();
+      dataService = new DataService(mockDb);
+      app = await createAPI(dataService);
+      response = await request(app)
+        .delete(`/articles/1`);
+    });
 
-// describe(`API deletes an article`, () => {
-//   describe(`API correctly deletes an article`, () => {
-//     let app;
-//     let response;
+    test(`Status code 200`, () => expect(response.statusCode).toBe(HttpCode.OK));
+    test(`Returns deleted article`, () => expect(response.body).toBeTruthy());
+    test(`Article not exists`, async () => await expect(dataService.findOne(1)).resolves.toBeNull());
+  });
 
-//     beforeAll(async () => {
-//       app = await createAPI();
-//       response = await request(app)
-//         .delete(`/articles/1`);
-//     });
+  describe(`API refuses to delete non-existent article`, () => {
+    let app;
 
-//     test(`Status code 200`, () => expect(response.statusCode).toBe(HttpCode.OK));
-//     test(`Returns deleted article`, () => expect(response.body).toBeTruthy());
-//     //test(`Article not exists`, () => expect(dataService.findOne(response.body.id)).toBeFalsy());
-//   });
+    beforeAll(async () => {
+      app = await createAPI();
+    });
 
-//   describe(`API refuses to delete non-existent article`, () => {
-//     let app;
+    test(`API returns status code 404`, () => {
+      return request(app)
+        .delete(`/articles/100`)
+        .expect(HttpCode.NOT_FOUND);
+    });
+  });
+});
 
-//     beforeAll(async () => {
-//       app = await createAPI();
-//     });
+describe(`API returns a list of comments to given article`, () => {
+  let app;
+  let response;
 
-//     test(`API returns status code 404`, () => {
-//       return request(app)
-//         .delete(`/articles/100`)
-//         .expect(HttpCode.NOT_FOUND);
-//     });
-//   });
-// });
+  beforeAll(async () => {
+    app = await createAPI();
+    response = await request(app)
+      .get(`/articles/2/comments`);
+  });
 
+  test(`Status code 200`, () => expect(response.statusCode).toBe(HttpCode.OK));
+  test(`Returns list of 2 comments`, () => expect(response.body.length).toBe(2));
+  test(`First comment's text is "Давно не пользуюсь стационарными компьютерами. Ноутбуки победили. Согласен с автором! Хочу такую же футболку :-) Совсем немного... Мне кажется или я уже читал это где-то? Это где ж такие красоты? Планируете записать видосик на эту тему? Плюсую, но слишком много буквы!"`,
+      () => expect(response.body[0].text).toBe(`Давно не пользуюсь стационарными компьютерами. Ноутбуки победили. Согласен с автором! Хочу такую же футболку :-) Совсем немного... Мне кажется или я уже читал это где-то? Это где ж такие красоты? Планируете записать видосик на эту тему? Плюсую, но слишком много буквы!`));
+});
 
-// describe(`API returns a list of comments to given article`, () => {
-//   let app;
-//   let response;
+describe(`API creates a comment`, () => {
+  describe(`API creates a comment if data is valid`, () => {
+    const newComment = {
+      text: `Валидному комментарию достаточно этого поля`
+    };
 
-//   beforeAll(async () => {
-//     app = await createAPI();
-//     response = await request(app)
-//       .get(`/articles/2/comments`);
-//   });
+    let app;
+    let response;
+    let dataService;
+    let commentService;
 
-//   test(`Status code 200`, () => expect(response.statusCode).toBe(HttpCode.OK));
-//   test(`Returns list of 2 comments`, () => expect(response.body.length).toBe(2));
-//   test(`First comment's text is "Давно не пользуюсь стационарными компьютерами. Ноутбуки победили. Согласен с автором! Хочу такую же футболку :-) Совсем немного... Мне кажется или я уже читал это где-то? Это где ж такие красоты? Планируете записать видосик на эту тему? Плюсую, но слишком много буквы!"`,
-//       () => expect(response.body[0].text).toBe(`Давно не пользуюсь стационарными компьютерами. Ноутбуки победили. Согласен с автором! Хочу такую же футболку :-) Совсем немного... Мне кажется или я уже читал это где-то? Это где ж такие красоты? Планируете записать видосик на эту тему? Плюсую, но слишком много буквы!`));
-// });
+    beforeAll(async () => {
+      const mockDb = await getInstanceDb();
+      dataService = new DataService(mockDb);
+      commentService = new CommentService(mockDb);
+      app = await createAPI(dataService, commentService);
+      response = await request(app)
+        .post(`/articles/1/comments`)
+        .send(newComment);
+    });
 
-// describe(`API creates a comment`, () => {
-//   describe(`API creates a comment if data is valid`, () => {
-//     const newComment = {
-//       text: `Валидному комментарию достаточно этого поля`
-//     };
-//     /*const dataService = new DataService(cloneData);
-//     const commentService = new CommentService();
-//     const app = createAPI([dataService, commentService]);*/
+    test(`Status code 201`, () => expect(response.statusCode).toBe(HttpCode.CREATED));
+    test(`Returns comment created`, () => expect(response.body).toBeDefined());
+    test(`Comments count is changed`, async () => await expect(Object.values(await commentService.findAll(1)).length).toBe(2));
+  });
 
-//     let app;
-//     let response;
+  describe(`API refuses to create a comment when data is invalid, and returns status code 400`, () => {
+    let app;
 
-//     beforeAll(async () => {
-//       app = await createAPI();
-//       response = await request(app)
-//         .post(`/articles/1/comments`)
-//         .send(newComment);
-//     });
+    beforeAll(async () => {
+      app = await createAPI();
+    });
 
-//     test(`Status code 201`, () => expect(response.statusCode).toBe(HttpCode.CREATED));
-//     test(`Returns comment created`, () => expect(response.body).toBeDefined());
-//     //test(`Comments count is changed`, () => expect(commentService.findAll(dataService.findOne(`RnjHT8`)).length).toBe(3));
-//   });
+    test(`API returns status code 400`, () => {
+      return request(app)
+        .post(`/articles/1/comments`)
+        .send({})
+        .expect(HttpCode.BAD_REQUEST);
+    });
+  });
 
-//   describe(`API refuses to create a comment when data is invalid, and returns status code 400`, () => {
-//     let app;
+  describe(`API refuses to create a comment to non-existent article and returns status code 404`, () => {
+    let app;
 
-//     beforeAll(async () => {
-//       app = await createAPI();
-//     });
+    beforeAll(async () => {
+      app = await createAPI();
+    });
 
-//     test(`API returns status code 400`, () => {
-//       return request(app)
-//         .post(`/articles/1/comments`)
-//         .send({})
-//         .expect(HttpCode.BAD_REQUEST);
-//     });
-//   });
+    test(`API returns status code 404`, async () => {
+      return request(app)
+        .post(`/articles/100/comments`)
+        .send({
+          text: `Неважно`
+        })
+        .expect(HttpCode.NOT_FOUND);
+    });
+  });
+});
 
-//   describe(`API refuses to create a comment to non-existent article and returns status code 404`, () => {
-//     let app;
+describe(`API refuses to delete a comment`, () => {
+  describe(`API correctly deletes a comment`, () => {
+    let app;
+    let response;
+    let dataService;
+    let commentService;
 
-//     beforeAll(async () => {
-//       app = await createAPI();
-//     });
+    beforeAll(async () => {
+      const mockDb = await getInstanceDb();
+      dataService = new DataService(mockDb);
+      commentService = new CommentService(mockDb);
+      app = await createAPI(dataService, commentService);
+      response = await request(app)
+        .delete(`/articles/1/comments/1`);
+    });
 
-//     test(`API returns status code 404`, async () => {
-//       return request(app)
-//         .post(`/articles/100/comments`)
-//         .send({
-//           text: `Неважно`
-//         })
-//         .expect(HttpCode.NOT_FOUND);
-//     });
-//   });
-// });
+    test(`Status code 200`, () => expect(response.statusCode).toBe(HttpCode.OK));
+    test(`Comment is not exists`, async () => await expect(commentService.drop(1)).resolves.toBeFalsy());
+  });
 
-// describe(`API refuses to delete a comment`, () => {
-//   describe(`API correctly deletes a comment`, () => {
-//     /*const dataService = new DataService(cloneData);
-//     const commentService = new CommentService();
-//     const app = createAPI([dataService, commentService]);*/
-//     let app;
-//     let response;
+  describe(`API refuses to delete non-existent comment`, () => {
+    let app;
 
-//     beforeAll(async () => {
-//       app = await createAPI();
-//       response = await request(app)
-//         .delete(`/articles/1/comments/1`);
-//     });
+    beforeAll(async () => {
+      app = await createAPI();
+    });
 
-//     test(`Status code 200`, () => expect(response.statusCode).toBe(HttpCode.OK));
-//     //test(`Comment is not exists`, () => expect((commentService.drop(dataService.findOne(`RnjHT8`), `9nkHOd`))).toBeNull());
-//   });
+    test(`API returns status code 404`, () => {
+      return request(app)
+        .delete(`/articles/1/comments/40`)
+        .expect(HttpCode.NOT_FOUND);
+    });
+  });
 
-//   describe(`API refuses to delete non-existent comment`, () => {
-//     let app;
+  describe(`API refuses to delete a comment to non-existent article`, () => {
+    let app;
 
-//     beforeAll(async () => {
-//       app = await createAPI();
-//     });
+    beforeAll(async () => {
+      app = await createAPI();
+    });
 
-//     test(`API returns status code 404`, () => {
-//       return request(app)
-//         .delete(`/articles/1/comments/40`)
-//         .expect(HttpCode.NOT_FOUND);
-//     });
-//   });
-
-//   describe(`API refuses to delete a comment to non-existent article`, () => {
-//     let app;
-
-//     beforeAll(async () => {
-//       app = await createAPI();
-//     });
-
-//     test(`API returns status code 404`, () => {
-//       return request(app)
-//         .delete(`/articles/100/comments/1`)
-//         .expect(HttpCode.NOT_FOUND);
-//     });
-//   });
-// });
+    test(`API returns status code 404`, () => {
+      return request(app)
+        .delete(`/articles/100/comments/1`)
+        .expect(HttpCode.NOT_FOUND);
+    });
+  });
+});
