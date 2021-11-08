@@ -12,10 +12,12 @@ module.exports = (app, articleService, commentService) => {
   app.use(`/articles`, route);
 
   route.get(`/`, async (req, res) => {
-    const {comments} = req.query;
-    let articles = await articleService.findAll(comments);
+    const {offset, limit, needComments} = req.query;
+    let result;
 
-    res.status(HttpCode.OK).json(articles);
+    result = await articleService.findAll({limit, offset, needComments});
+
+    res.status(HttpCode.OK).json(result);
   });
 
   route.get(`/:articleId`, async (req, res) => {
@@ -74,7 +76,7 @@ module.exports = (app, articleService, commentService) => {
   route.delete(`/:articleId/comments/:commentId`, articleExist(articleService), async (req, res) => {
     const {commentId} = req.params;
     const deleted = await commentService.drop(commentId);
-    console.log(deleted);
+
     if (deleted) {
       return res.status(HttpCode.OK)
         .json(deleted);
