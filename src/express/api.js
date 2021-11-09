@@ -1,7 +1,7 @@
 'use strict';
 
 const axios = require(`axios`);
-
+const {HttpMethod} = require(`../constants`);
 const TIMEOUT = 10000;
 
 const port = process.env.API_PORT || 3000;
@@ -20,12 +20,12 @@ class API {
     return response.data;
   }
 
-  async getArticles({offset, limit, needComments}) {
+  async getArticles({offset, limit, needComments} = {}) {
     return this._load(`/articles`, {params: {offset, limit, needComments}});
   }
 
-  async getArticle(id) {
-    return this._load(`/articles/${id}`);
+  async getArticle(id, comments) {
+    return this._load(`/articles/${id}`, {params: {comments}});
   }
 
   async search(query) {
@@ -36,9 +36,23 @@ class API {
     return this._load(`/categories`, {params: {count}});
   }
 
-  async creatAarticle(data) {
+  async creatArticle(data) {
     return this._load(`/articles`, {
-      method: `POST`,
+      method: HttpMethod.POST,
+      data
+    });
+  }
+
+  editArticle(id, data) {
+    return this._load(`/articles/${id}`, {
+      method: HttpMethod.PUT,
+      data
+    });
+  }
+
+  createComment(id, data) {
+    return this._load(`/articles/${id}/comments`, {
+      method: HttpMethod.POST,
       data
     });
   }

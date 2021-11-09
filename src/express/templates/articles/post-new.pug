@@ -22,7 +22,7 @@ block content
               .form__wrapper.form__wrapper--intro
                 .form__field
                   label
-                    input(type='text' name='title' placeholder='Заголовок' required='')
+                    input(type='text' name='title' id="article-name" placeholder='Заголовок' required='')
                 .form__field.form__field--post-image
                   label
                     input#image-name-field(type='text' name='photo' placeholder='Фотография' readonly='')
@@ -38,4 +38,5 @@ block content
                     textarea(rows='5' name='announcement' placeholder='Анонс публикации')
                 .form__field.form__field--publication-text
                   label
-                    textarea(rows='10' name='full-text' placeholder='Полный текст публикации')
+                    textarea(rows='10' name='fulltext' placeholder='Полный текст публикации')
+          +insertErrorMessage(validationMessages)
