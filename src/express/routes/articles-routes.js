@@ -99,8 +99,21 @@ articlesRouter.post(`/edit/:id`, upload.single(`avatar`), async (req, res) => {
 
 articlesRouter.get(`/:id`, async (req, res) => {
   const {id} = req.params;
-  const article = await getViewArticleData(id, true);
-  res.render(`articles/post-detail`, {article, id});
+  const [
+    article,
+    categories
+  ] = await Promise.all([
+    api.getArticle(id, {needComments: true}),
+    api.getCategories(true)
+  ]);
+
+  let articleCategories = categories.filter((item) => {
+    return article.categories.find((kitem) => {
+      return kitem.id === item.id;
+    });
+  });
+
+  res.render(`articles/post-detail`, {article, id, articleCategories});
 });
 
 articlesRouter.post(`/:id/comments`, async (req, res) => {

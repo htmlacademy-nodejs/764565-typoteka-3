@@ -12,36 +12,19 @@ block content
             time.post__date(datetime='2019-03-21T20:33') #{article.createdAt}
             h2.post__title.title.title--main #{article.title}
             ul.post__themes.themes
-              li.themes__item
-                a.themes__item-link(href='#')
-                  | Автомобили
-                  sup 88
-                button.themes__remove-btn(type='button') Удалить категорию
-              li.themes__item
-                a.themes__item-link(href='#')
-                  | Удаленная работа
-                  sup 13
-                button.themes__remove-btn(type='button') Удалить категорию
-              li.themes__item
-                a.themes__item-link(href='#')
-                  | Бизнес
-                  sup 13
-                button.themes__remove-btn(type='button') Удалить категорию
+              each category of articleCategories
+                li.themes__item
+                  a.themes__item-link(href='#')
+                    | #{category.name}
+                    sup #{category.count}
+                  button.themes__remove-btn(type='button') Удалить категорию              
           .post__picture
             img(src='/img/sea-fullsize@1x.jpg' alt='пейзаж море, скалы, пляж')
           .post__text
-            h3 Бирюзовое доверие
             p
-              | У Apple иногда попадаются интерфейсы, за которые создателей хочется сильно
-              | поругать
-              | — к примеру интерфейс
-              | публикации приложения в AppStore, для которого я уже неделю восстановливаю свой аккаунт разработчика.
+              | #{article.announce}
             p
-              | Или интерфейс подключения AirPods на макбуке. Чтобы переключить наушники между
-              | телефоном и компьютером,
-              | нужно сначала нажать на значок звука, затем дождаться, когда в списке устройств появятся наушники, потом
-              | нажать на них и дождаться, пока случится вся магия подключения. Иногда по загадочным причинам магия не
-              | случается, и операцию нужно повторить, выполняя все те же клики-ожидания-клики — бесит.
+              | #{article.description}
       .post__wrapper.post__wrapper--comments
         section.post__comments.comments
           h2.comments__title.title.title--middle Комментарии
@@ -56,10 +39,10 @@ block content
                     time.comments__date(datetime='2019-03-21T20:33') #{comment.createdAt}
                   p.comments__message #{comment.text}
           .comments__footer.comments__footer--user
-            form(action=`/articles/${id}/comments` method="post" enctype="application/x-www-form-urlencoded"
-             autocomplete="off")
+            form(action=`/articles/${id}/comments` method='POST' enctype="application/x-www-form-urlencoded" autocomplete="off")
               .comments__avatar.avatar
                 img(src='/img/avatar-2.png' alt='аватар пользователя')
               label
                 textarea(rows='1' name='message' placeholder='Присоединиться к обсуждению')
               button.comments__button.button.button--colored(type='submit') Опубликовать
+            +insertErrorMessage(validationMessages)
