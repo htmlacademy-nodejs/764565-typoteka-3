@@ -37,8 +37,22 @@ const getEditArticleData = async (articleId) => {
   return [article, categories];
 };
 
-const getViewArticleData = (articleId, comments) => {
-  return api.getArticle(articleId, comments);
+const getViewArticleData = async (articleId) => {
+  const [
+    article,
+    categories
+  ] = await Promise.all([
+    api.getArticle(articleId, {needComments: true}),
+    api.getCategories(true)
+  ]);
+
+  let articleCategories = categories.filter((item) => {
+    return article.categories.find((kitem) => {
+      return kitem.id === item.id;
+    });
+  });
+
+  return [article, articleCategories];
 };
 
 articlesRouter.get(`/category/:id`, (req, res) => res.render(`articles-by-category`));
@@ -99,19 +113,7 @@ articlesRouter.post(`/edit/:id`, upload.single(`avatar`), async (req, res) => {
 
 articlesRouter.get(`/:id`, async (req, res) => {
   const {id} = req.params;
-  const [
-    article,
-    categories
-  ] = await Promise.all([
-    api.getArticle(id, {needComments: true}),
-    api.getCategories(true)
-  ]);
-
-  let articleCategories = categories.filter((item) => {
-    return article.categories.find((kitem) => {
-      return kitem.id === item.id;
-    });
-  });
+  const [article, articleCategories] = await getViewArticleData(id);
 
   res.render(`articles/post-detail`, {article, id, articleCategories});
 });
@@ -124,20 +126,7 @@ articlesRouter.post(`/:id/comments`, async (req, res) => {
     res.redirect(`/articles/${id}`);
   } catch (errors) {
     const validationMessages = prepareErrors(errors);
-
-    const [
-      article,
-      categories
-    ] = await Promise.all([
-      api.getArticle(id, {needComments: true}),
-      api.getCategories(true)
-    ]);
-
-    let articleCategories = categories.filter((item) => {
-      return article.categories.find((kitem) => {
-        return kitem.id === item.id;
-      });
-    });
+    const [article, articleCategories] = await getViewArticleData(id);
 
     res.render(`articles/post-detail`, {article, id, articleCategories, validationMessages});
   }
