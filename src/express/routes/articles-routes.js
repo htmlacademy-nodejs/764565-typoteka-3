@@ -124,8 +124,22 @@ articlesRouter.post(`/:id/comments`, async (req, res) => {
     res.redirect(`/articles/${id}`);
   } catch (errors) {
     const validationMessages = prepareErrors(errors);
-    const article = await getViewArticleData(id, true);
-    res.render(`articles/post-detail`, {article, id, validationMessages});
+
+    const [
+      article,
+      categories
+    ] = await Promise.all([
+      api.getArticle(id, {needComments: true}),
+      api.getCategories(true)
+    ]);
+
+    let articleCategories = categories.filter((item) => {
+      return article.categories.find((kitem) => {
+        return kitem.id === item.id;
+      });
+    });
+
+    res.render(`articles/post-detail`, {article, id, articleCategories, validationMessages});
   }
 });
 
