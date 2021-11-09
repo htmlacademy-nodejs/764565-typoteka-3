@@ -51,3 +51,7 @@ module.exports.writeJsonFile = async (fileName, data) => {
 };
 
 module.exports.ensureArray = (value) => Array.isArray(value) ? value : [value];
+
+module.exports.prepareErrors = (errors) => {
+  return errors.response.data.split(`\n`);
+};

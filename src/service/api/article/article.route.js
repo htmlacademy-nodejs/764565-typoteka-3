@@ -2,9 +2,10 @@
 
 const {Router} = require(`express`);
 const {HttpCode} = require(`../../../constants`);
-const articleValidator = require(`../../middlewares/article-validator`);
+const editArticleValidator = require(`./validators/edit-article.validator`);
+const validatorDate = require(`../../middlewares/validator-data`);
 const articleExist = require(`../../middlewares/article-exists`);
-const commentValidator = require(`../../middlewares/comment-validator`);
+const commentValidator = require(`./validators/create-comment.validator`);
 
 module.exports = (app, articleService, commentService) => {
   const route = new Router();
@@ -22,7 +23,9 @@ module.exports = (app, articleService, commentService) => {
 
   route.get(`/:articleId`, async (req, res) => {
     const {articleId} = req.params;
-    const article = await articleService.findOne(articleId);
+    const {comments} = req.query;
+
+    const article = await articleService.findOne(articleId, comments);
     if (article) {
       return res.status(HttpCode.OK)
         .json(article);
@@ -32,13 +35,13 @@ module.exports = (app, articleService, commentService) => {
     }
   });
 
-  route.post(`/`, articleValidator, async (req, res) => {
+  route.post(`/`, validatorDate(editArticleValidator), async (req, res) => {
     const article = await articleService.create(req.body);
     return res.status(HttpCode.CREATED)
       .json(article);
   });
 
-  route.put(`/:articleId`, articleValidator, async (req, res) => {
+  route.put(`/:articleId`, validatorDate(editArticleValidator), async (req, res) => {
     const {articleId} = req.params;
     const existArticle = await articleService.findOne(articleId);
 
@@ -86,7 +89,7 @@ module.exports = (app, articleService, commentService) => {
     }
   });
 
-  route.post(`/:articleId/comments`, [articleExist(articleService), commentValidator], async (req, res) => {
+  route.post(`/:articleId/comments`, [articleExist(articleService), validatorDate(commentValidator)], async (req, res) => {
     const {articleId} = req.params;
     const comment = commentService.create(articleId, req.body);
 

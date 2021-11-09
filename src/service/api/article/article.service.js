@@ -29,8 +29,13 @@ class ArticleService {
     return !!deletedRows;
   }
 
-  findOne(id) {
-    return this._Article.findByPk(id, {include: [Aliase.CATEGORIES]});
+  findOne(id, needComments) {
+    const include = [Aliase.CATEGORIES];
+
+    if (needComments) {
+      include.push(Aliase.COMMENTS);
+    }
+    return this._Article.findByPk(id, {include});
   }
 
   async findAll({limit, offset, needComments}) {

@@ -5,7 +5,7 @@ block content
     section
       .popup.popup--new-publication.popup--anti
         .new-publication
-          form(action='#' method='POST')
+          form(action=`/articles/edit/${id}` method='POST' enctype="multipart/form-data" autocomplete="off")
             .new-publication__header
               h1 Новая публикация
               .new-publication__date-form
@@ -19,6 +19,7 @@ block content
               | Закрыть
               | окно
             .new-publication__form.form
+              +insertErrorMessage(validationMessages)
               .form__wrapper.form__wrapper--intro
                 .form__field
                   label
@@ -34,10 +35,10 @@ block content
                 .new-publication__category-wrapper
                   - var isArticleCategory = article.category
                   if isArticleCategory
-                  each category of article.category
+                  each category of article.categories
                     div.new-publication__checkbox.new-publication__checkbox--auto
                       label
-                        input.visually-hidden(type='checkbox' ) 
+                        input.visually-hidden(value=category.id checked type='checkbox' name=`category`)
                         | #{category.name}
                   a.new-publication__form-link.button.button--transparent(href='#') Добавить категорию
               .form__wrapper.form__wrapper--text
@@ -49,7 +50,7 @@ block content
                         | #{article.announce}
                 .form__field.form__field--publication-text
                   label
-                    - var isArticleFullText = article.fullText
+                    - var isArticleFullText = article.description
                     if isArticleFullText
-                      textarea(rows='10' name='full-text' placeholder='Полный текст публикации')
-                        | #{article.fullText}
+                      textarea(rows='10' name='fulltext' placeholder='Полный текст публикации')
+                        | #{article.description}
