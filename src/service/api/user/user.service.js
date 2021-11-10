@@ -1,5 +1,7 @@
 'use strict';
 
+const passwordUtils = require(`../../lib/password`);
+
 class UserService {
   constructor(sequelize) {
     this._User = sequelize.models.User;
@@ -16,6 +18,12 @@ class UserService {
     });
     return user && user.get();
   }
+
+  async createHash(userData) {
+    userData.passwordHash = await passwordUtils.hash(userData.password);
+    return userData;
+  }
+
 }
 
 module.exports = UserService;

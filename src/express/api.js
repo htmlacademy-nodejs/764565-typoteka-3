@@ -24,8 +24,8 @@ class API {
     return this._load(`/articles`, {params: {offset, limit, needComments}});
   }
 
-  async getArticle(id, comments) {
-    return this._load(`/articles/${id}`, {params: {comments}});
+  async getArticle(id, needComments) {
+    return this._load(`/articles/${id}`, {params: {needComments}});
   }
 
   async search(query) {

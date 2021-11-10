@@ -23,9 +23,9 @@ module.exports = (app, articleService, commentService) => {
 
   route.get(`/:articleId`, validatorRoute, async (req, res) => {
     const {articleId} = req.params;
-    const {comments} = req.query;
+    const {needComments} = req.query;
 
-    const article = await articleService.findOne(articleId, comments);
+    const article = await articleService.findOne(articleId, needComments);
     if (article) {
       return res.status(HttpCode.OK)
         .json(article);
