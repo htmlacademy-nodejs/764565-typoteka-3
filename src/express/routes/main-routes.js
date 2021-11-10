@@ -1,11 +1,14 @@
 'use strict';
 
 const {Router} = require(`express`);
+const upload = require(`../middlewares/upload`);
+const {prepareErrors} = require(`../../utils`);
+
 const mainRouter = new Router();
 
-const ARTICLES_PER_PAGE = 8;
-
 const api = require(`../api`).getAPI();
+
+const ARTICLES_PER_PAGE = 8;
 
 mainRouter.get(`/`, async (req, res) => {
   let {page = 1} = req.query;
@@ -28,6 +31,27 @@ mainRouter.get(`/`, async (req, res) => {
 });
 
 mainRouter.get(`/register`, (req, res) => res.render(`sign-up`));
+
+mainRouter.post(`/register`, upload.single(`avatar`), async (req, res) => {
+  const {body, file} = req;
+  const userData = {
+    avatar: file ? file.filename : ``,
+    firstName: body.name,
+    lastName: body.surname,
+    email: body.email,
+    password: body.password,
+    passwordRepeated: body[`repeat-password`]
+  };
+
+  try {
+    await api.createUser(userData);
+    res.redirect(`/login`);
+  } catch (errors) {
+    const validationMessages = prepareErrors(errors);
+    res.render(`sign-up`, {validationMessages});
+  }
+});
+
 mainRouter.get(`/login`, (req, res) => res.render(`login`));
 
 mainRouter.get(`/search`, async (req, res) => {

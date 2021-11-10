@@ -8,7 +8,8 @@ const ErrorArticleMessage = {
   TITLE_MAX: `Заголовок не может содержать более 250 символов`,
   ANNOUNCE_MIN: `Анонс содержит меньше 30 символов`,
   ANNOUNCE_MAX: `Анонс не может содержать более 250 символов`,
-  DESCRIPTION_MAX: `Описание не может содержать более 1000 символов`
+  DESCRIPTION_MAX: `Описание не может содержать более 1000 символов`,
+  USER_ID: `Некорректный идентификатор пользователя`
 };
 
 module.exports = Joi.object({
@@ -28,5 +29,8 @@ module.exports = Joi.object({
   }),
   description: Joi.string().max(1000).messages({
     'string.max': ErrorArticleMessage.DESCRIPTION_MAX
+  }),
+  userId: Joi.number().integer().positive().required().messages({
+    'number.base': ErrorArticleMessage.USER_ID
   })
 });

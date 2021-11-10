@@ -3,6 +3,7 @@
 const chalk = require(`chalk`);
 const {getLogger} = require(`../lib/logger`);
 const sequelize = require(`../api/sequelize`);
+const passwordUtils = require(`../lib/password`);
 const initDatabase = require(`../lib/init-db`);
 
 const {
@@ -23,6 +24,11 @@ const MAX_CATEGORIES = 4;
 
 const logger = getLogger({});
 
+
+const generateRandomUser = (users) => {
+  return users[getRandomInt(0, users.length - 1)].email;
+};
+
 const generateRandomTitle = (titles) => {
   return titles[getRandomInt(0, titles.length - 1)].slice(0, 249);
 };
@@ -39,10 +45,10 @@ const generateRandomCategory = (categories) => {
   return shuffle(categories).slice(0, getRandomInt(1, MAX_CATEGORIES));
 };
 
-const generateRandomComments = (comments) => {
-
+const generateRandomComments = (comments, users) => {
   const count = getRandomInt(1, comments.length);
   return Array(count).fill({}).map(() => ({
+    user: users[getRandomInt(0, users.length - 1)].email,
     text: shuffle(comments)
       .slice(0, getRandomInt(1, comments.length))
       .join(` `)
@@ -51,13 +57,14 @@ const generateRandomComments = (comments) => {
   }));
 };
 
-const generatePublications = (count, titles, categories, sentences, comments) => {
+const generatePublications = (count, titles, categories, sentences, comments, users) => {
   return Array(count).fill({}).map(() => ({
+    user: generateRandomUser(users),
     title: generateRandomTitle(titles),
     announce: generateRandomAnnounce(sentences),
     description: generateRandomFullText(sentences),
     category: generateRandomCategory(categories),
-    comments: generateRandomComments(comments),
+    comments: generateRandomComments(comments, users),
   }));
 };
 
@@ -92,10 +99,23 @@ module.exports = {
         readContentFromFile(FILE_CATEGORIES_PATH),
         readContentFromFile(FILE_COMMENTS_PATH)
       ]);
+      const users = [
+        {
+          firstName: `Иван`,
+          lastName: `Иванов`,
+          email: `ivanov@example.com`,
+          passwordHash: await passwordUtils.hash(`ivanov`)
+        },
+        {
+          firstName: `Пётр`,
+          lastName: `Петров`,
+          email: `petrov@example.com`,
+          passwordHash: await passwordUtils.hash(`petrov`)
+        }
+      ];
 
-      const articles = generatePublications(countPublications, titles, categories, sentences, comments);
-      console.log(articles);
-      return initDatabase(sequelize, {articles, categories});
+      const articles = generatePublications(countPublications, titles, categories, sentences, comments, users);
+      return initDatabase(sequelize, {articles, categories, users});
     } catch (err) {
       console.log(chalk.red(err.message));
       throw err;
