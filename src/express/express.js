@@ -48,7 +48,10 @@ app.use(express.static(path.resolve(__dirname, PUBLIC_DIR)));
 app.use(express.static(path.resolve(__dirname, UPLOAD_DIR)));
 
 app.use((req, res) => res.status(HttpCode.BAD_REQUEST).render(`errors/404`));
-app.use((err, req, res, next) => res.status(HttpCode.INTERNAL_SERVER_ERROR).render(`errors/500`));
+app.use((err, req, res, next) => {
+  console.log(err);
+  res.status(HttpCode.INTERNAL_SERVER_ERROR).render(`errors/500`);
+});
 
 app.set(`views`, path.resolve(__dirname, `templates`));
 app.set(`view engine`, `pug`);
