@@ -4,8 +4,17 @@ header.header
     span.logo__name Типотека
   nav.header__nav
     ul.header__nav-list
+    if user
+      li.header__list-item
+        p #{user.firstName} #{user.lastName}
+      li.header__list-item
+        a.class="header__exit"(href="/logout") Выйти  
+    else
       li.header__list-item
         a.header__registration(href="/register") Регистрация
       li.header__list-item
         a.header__enter(href="/login") Вход с паролем
+  if user
+    a.header__avatar.avatar(href="#")
+        img(src=`/img/${user.avatar}` alt="Аватар пользователя")
   a.header__search.button.button--search(href="/search" aria-label="поиск по сайту")
