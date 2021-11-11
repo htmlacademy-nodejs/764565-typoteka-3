@@ -10,7 +10,7 @@ block content
           | окно
         h2.popup__title Регистрация
         .popup__form.popup__form--active.form.form--register
-          form(action='#' method='get')
+          form(action="/register" method="post" enctype="multipart/form-data" autocomplete="off")
             .form__field
               label
                 input(type='email' name='email' placeholder='Электронная почта' required='')
@@ -37,4 +37,5 @@ block content
               label
                 input.visually-hidden(type='file' name='upload')
                 | Загрузить фото профиля
+            +insertErrorMessage(validationMessages)
             button.form__submit-btn.form__submit-btn--register.button.button--colored(type='submit') Зарегистрироваться
