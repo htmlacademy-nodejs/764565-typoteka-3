@@ -35,7 +35,7 @@ block content
                   img(src='/img/avatar-1.png' alt='аватар пользователя')
                 .comments__text
                   .comments__head
-                    p Евгений Петров •
+                    p #{comment.users.firstName} #{comment.users.lastName} 
                     time.comments__date(datetime='2019-03-21T20:33') #{comment.createdAt}
                   p.comments__message #{comment.text}
           .comments__footer.comments__footer--user
