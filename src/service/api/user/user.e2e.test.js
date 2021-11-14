@@ -168,7 +168,7 @@ describe(`API refuses to create user if data is invalid`, () => {
   });
 });
 
-describe.skip(`API authenticate user if data is valid`, () => {
+describe(`API authenticate user if data is valid`, () => {
   const validAuthData = {
     email: `ivanov@example.com`,
     password: `ivanov`
@@ -185,10 +185,10 @@ describe.skip(`API authenticate user if data is valid`, () => {
 
   test(`Status code is 200`, () => expect(response.statusCode).toBe(HttpCode.OK));
 
-  test(`User name is Иван Иванов`, () => expect(response.body.name).toBe(`Иван Иванов`));
+  test(`User name is Иван Иванов`, () => expect(response.body.firstName).toBe(`Иван`));
 });
 
-describe.skip(`API refuses to authenticate user if data is invalid`, () => {
+describe(`API refuses to authenticate user if data is invalid`, () => {
   let app;
 
   beforeAll(async () => {

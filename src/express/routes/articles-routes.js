@@ -1,11 +1,16 @@
 'use strict';
 
 const {Router} = require(`express`);
-const articlesRouter = new Router();
+
 const upload = require(`../middlewares/upload`);
+const auth = require(`../middlewares/auth`);
+const csrf = require(`csurf`);
 const {ensureArray, prepareErrors} = require(`../../utils`);
 
 const api = require(`../api`).getAPI();
+const articlesRouter = new Router();
+
+const csrfProtection = csrf();
 
 const getAddArticleData = () => {
   return api.getCategories();
@@ -37,22 +42,28 @@ const getViewArticleData = async (articleId) => {
   return [article, articleCategories];
 };
 
-articlesRouter.get(`/category/:id`, (req, res) => res.render(`articles-by-category`));
+articlesRouter.get(`/category/:id`, (req, res) => {
+  const {user} = req.session;
+  res.render(`articles-by-category`, {user});
+});
 
-articlesRouter.get(`/add`, async (req, res) => {
+articlesRouter.get(`/add`, auth, csrfProtection, async (req, res) => {
+  const {user} = req.session;
   const categories = await getAddArticleData();
-  res.render(`articles/post-new`, {categories});
+  res.render(`articles/post-new`, {categories, user, csrfToken: req.csrfToken()});
 });
 
 
-articlesRouter.post(`/add`, upload.single(`avatar`), async (req, res) => {
+articlesRouter.post(`/add`, auth, upload.single(`avatar`), csrfProtection, async (req, res) => {
+  const {user} = req.session;
   const {body, file} = req;
   const articleData = {
     picture: file ? file.filename : ``,
     title: body.title,
     category: ensureArray(body.category),
     announce: body.announce,
-    fullText: body.fullText
+    fullText: body.fullText,
+    userId: user.id
   };
   try {
     await api.createArticle(articleData);
@@ -60,27 +71,28 @@ articlesRouter.post(`/add`, upload.single(`avatar`), async (req, res) => {
   } catch (errors) {
     const validationMessages = prepareErrors(errors);
     const categories = await getAddArticleData();
-    res.render(`articles/post-new`, {categories, validationMessages});
+    res.render(`articles/post-new`, {categories, user, validationMessages, csrfToken: req.csrfToken()});
   }
 });
 
-articlesRouter.get(`/edit/:id`, async (req, res) => {
+articlesRouter.get(`/edit/:id`, auth, csrfProtection, async (req, res) => {
+  const {user} = req.session;
   const {id} = req.params;
   const [article, categories] = await getEditArticleData(id);
-
-  res.render(`articles/post`, {id, article, categories});
+  res.render(`articles/post`, {id, article, categories, user, csrfToken: req.csrfToken()});
 });
 
-articlesRouter.post(`/edit/:id`, upload.single(`avatar`), async (req, res) => {
+articlesRouter.post(`/edit/:id`, auth, upload.single(`avatar`), csrfProtection, async (req, res) => {
+  const {user} = req.session;
   const {body, file} = req;
   const {id} = req.params;
-
   const articleData = {
     picture: file ? file.filename : ``,
     description: body.fulltext,
     announce: body.announcement,
     title: body.title,
-    category: ensureArray(body.category)
+    category: ensureArray(body.category),
+    userId: user.id
   };
 
   try {
@@ -89,28 +101,30 @@ articlesRouter.post(`/edit/:id`, upload.single(`avatar`), async (req, res) => {
   } catch (errors) {
     const validationMessages = prepareErrors(errors);
     const [article, categories] = await getEditArticleData(id);
-    res.render(`articles/post`, {id, article, categories, validationMessages});
+    res.render(`articles/post`, {id, article, categories, user, validationMessages, csrfToken: req.csrfToken()});
   }
 });
 
-articlesRouter.get(`/:id`, async (req, res) => {
+articlesRouter.get(`/:id`, csrfProtection, async (req, res) => {
+  const {user} = req.session;
   const {id} = req.params;
   const [article, articleCategories] = await getViewArticleData(id);
 
-  res.render(`articles/post-detail`, {article, id, articleCategories});
+  res.render(`articles/post-detail`, {article, id, articleCategories, user, csrfToken: req.csrfToken()});
 });
 
-articlesRouter.post(`/:id/comments`, async (req, res) => {
+articlesRouter.post(`/:id/comments`, csrfProtection, async (req, res) => {
+  const {user} = req.session;
   const {id} = req.params;
   const {message} = req.body;
   try {
-    await api.createComment(id, {text: message});
+    await api.createComment(id, {userId: user.id, text: message});
     res.redirect(`/articles/${id}`);
   } catch (errors) {
     const validationMessages = prepareErrors(errors);
     const [article, articleCategories] = await getViewArticleData(id);
 
-    res.render(`articles/post-detail`, {article, id, articleCategories, validationMessages});
+    res.render(`articles/post-detail`, {article, id, articleCategories, user, validationMessages, csrfToken: req.csrfToken()});
   }
 });
 
