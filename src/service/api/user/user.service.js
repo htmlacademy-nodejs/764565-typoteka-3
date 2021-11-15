@@ -24,6 +24,10 @@ class UserService {
     return userData;
   }
 
+  async compareHash(password, passwordHash) {
+    return await passwordUtils.compare(password, passwordHash);
+  }
+
 }
 
 module.exports = UserService;
