@@ -1,6 +1,14 @@
 extends layout.pug
 
 block content
+  -
+    const MAX_TEXT_LENGTH = 99
+    const decreaseText = (text) => {
+      if (text.length > 100)
+        return text.slice(0, MAX_TEXT_LENGTH).concat(`...`)
+      return text
+    }
+    
   main.main-page
     h1.visually-hidden Главная страница личного блога Типотека
     p

@@ -33,6 +33,7 @@ mainRouter.get(`/`, async (req, res) => {
   ]);
 
   const totalPages = Math.ceil(articles.all.count / ARTICLES_PER_PAGE);
+  console.log(articles.commented);
 
   res.render(`main`, {articles, lastComments, page, totalPages, categories, user});
 });

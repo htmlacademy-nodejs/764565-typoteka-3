@@ -8,4 +8,4 @@ section.main-page__last.last
 				img.last__list-image(src='/img/avatar-small-1.png' width='20' height='20' alt='Аватар пользователя')
 				b.last__list-name #{lastComment.users.firstName} #{lastComment.users.lastName}
 				a.last__list-link(href=`/articles/${lastComment.articleId}`) 
-					| #{lastComment.text.length > 100 ? lastComment.text.slice(0, MAX_TEXT_LENGTH).concat(`...`) : lastComment.text}
+					| #{decreaseText(lastComment.text)}

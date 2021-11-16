@@ -1,6 +1,11 @@
 extends ../layout.pug
 
 block content
+  -
+    const formatDate = (dateString) => {
+      const date = new Date(dateString);
+      return date.toLocaleString('ru-RU', {day: '2-digit', month: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'});
+    }
   main
     section.post
       h1.visually-hidden Пост
@@ -9,7 +14,7 @@ block content
         .post__wrapper
           .post__head
             a.post__backwards.button.button--backwards(href='#') Назад
-            time.post__date(datetime='2019-03-21T20:33') #{article.createdAt}
+            time.post__date(datetime=`${article.createdAt}`) #{formatDate(article.createdAt)}
             h2.post__title.title.title--main #{article.title}
             ul.post__themes.themes
               each category of articleCategories
@@ -27,23 +32,29 @@ block content
               | #{article.description}
       .post__wrapper.post__wrapper--comments
         section.post__comments.comments
-          h2.comments__title.title.title--middle Комментарии
-          ul.comments__list
-            each comment of article.comments
-              li.comments__comment
+          if (article.comments.length === 0)
+            include ../partials/post-comments-empty
+          else
+            h2.comments__title.title.title--middle Комментарии
+            ul.comments__list
+              each comment of article.comments
+                li.comments__comment
+                  .comments__avatar.avatar
+                    img(src='/img/avatar-1.png' alt='аватар пользователя')
+                  .comments__text
+                    .comments__head
+                      p #{comment.users.firstName} #{comment.users.lastName} 
+                      time.comments__date(datetime='2019-03-21T20:33') #{comment.createdAt}
+                    p.comments__message #{comment.text}
+          if user
+            .comments__footer.comments__footer--user
+              +insertErrorMessage(validationMessages)
+              form(action=`/articles/${id}/comments` method='POST' enctype="application/x-www-form-urlencoded" autocomplete="off")
+                input(type="hidden" name="_csrf" value=csrfToken)
                 .comments__avatar.avatar
-                  img(src='/img/avatar-1.png' alt='аватар пользователя')
-                .comments__text
-                  .comments__head
-                    p #{comment.users.firstName} #{comment.users.lastName} 
-                    time.comments__date(datetime='2019-03-21T20:33') #{comment.createdAt}
-                  p.comments__message #{comment.text}
-          .comments__footer.comments__footer--user
-            +insertErrorMessage(validationMessages)
-            form(action=`/articles/${id}/comments` method='POST' enctype="application/x-www-form-urlencoded" autocomplete="off")
-              input(type="hidden" name="_csrf" value=csrfToken)
-              .comments__avatar.avatar
-                img(src='/img/avatar-2.png' alt='аватар пользователя')
-              label
-                textarea(rows='1' name='message' placeholder='Присоединиться к обсуждению')
-              button.comments__button.button.button--colored(type='submit') Опубликовать            
+                  img(src='/img/avatar-2.png' alt='аватар пользователя')
+                label
+                  textarea(rows='1' name='message' placeholder='Присоединиться к обсуждению')
+                button.comments__button.button.button--colored(type='submit') Опубликовать
+          else
+            include ../partials/post-comments-for-visitor

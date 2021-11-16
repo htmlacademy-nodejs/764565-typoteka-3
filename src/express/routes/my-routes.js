@@ -15,7 +15,7 @@ myRouter.get(`/`, auth, async (req, res) => {
 myRouter.get(`/comments`, auth, async (req, res) => {
   const {user} = req.session;
   const articles = await api.getArticles({needComments: true});
-  res.render(`comments`, {user, articles: articles.slice(0, 3)});
+  res.render(`comments`, {user, articles});
 });
 
 module.exports = myRouter;
