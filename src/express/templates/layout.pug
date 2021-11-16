@@ -19,10 +19,12 @@ doctype html
         padding: 10px;
       }
   body
+    -
+      const MAX_TEXT_LENGTH = 99
     mixin insertErrorMessage(messages)
       if messages
         each message of messages
-          .server-error= message
+          .server-error= message    
     mixin pagination(page, totalPages, width, prefix)
       -
         let start = page - width;

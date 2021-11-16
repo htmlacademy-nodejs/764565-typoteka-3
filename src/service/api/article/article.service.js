@@ -4,6 +4,7 @@ const Aliase = require(`../models.aliase`);
 
 class ArticleService {
   constructor(sequelize) {
+    this._sequelize = sequelize;
     this._Article = sequelize.models.Article;
     this._Comment = sequelize.models.Comment;
     this._Category = sequelize.models.Category;
@@ -99,6 +100,47 @@ class ArticleService {
     });
 
     return {count, articles: rows};
+  }
+
+  async findMostPopular({limitPopular}) {
+    const options = {
+      subQuery: false,
+      attributes: {
+        include: [
+          [this._sequelize.fn(`COUNT`, this._sequelize.col(`comments.id`)), `commentsCount`]
+        ]
+      },
+      include: [
+        {
+          model: this._Comment,
+          as: Aliase.COMMENTS,
+          attributes: [],
+        },
+        {
+          model: this._Category,
+          as: Aliase.CATEGORIES,
+          attributes: [`id`, `name`]
+        }
+      ],
+      group: [
+        `Article.id`,
+        `categories.id`,
+        `categories->ArticleCategory.ArticleId`,
+        `categories->ArticleCategory.CategoryId`
+      ],
+      order: [
+        [this._sequelize.fn(`COUNT`, this._sequelize.col(`comments.id`)), `DESC`]
+      ]
+    };
+
+    let articles = await this._Article.findAll(options);
+
+    articles = articles
+      .map((article) => article.get())
+      .filter((article) => article.commentsCount > 0);
+
+    return articles.slice(0, limitPopular);
+
   }
 }
 

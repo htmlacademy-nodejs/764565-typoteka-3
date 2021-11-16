@@ -14,11 +14,16 @@ module.exports = (app, articleService, commentService) => {
   app.use(`/articles`, route);
 
   route.get(`/`, async (req, res) => {
-    const {offset, limit, needComments} = req.query;
-    let result;
-    result = await articleService.findAll({limit, offset, needComments});
+    const {offset, limit, needComments, limitPopular, limitLastComments} = req.query;
+    let articles = {};
+    let lastComments;
+    articles.all = await articleService.findAll({limit, offset, needComments});
 
-    res.status(HttpCode.OK).json(result);
+    articles.commented = await articleService.findMostPopular({limitPopular});
+
+    lastComments = await commentService.findLast({limitLastComments});
+
+    res.status(HttpCode.OK).json({articles, lastComments});
   });
 
   route.get(`/:articleId`, validatorRoute, async (req, res) => {

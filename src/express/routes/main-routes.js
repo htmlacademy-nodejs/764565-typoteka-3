@@ -10,6 +10,8 @@ const mainRouter = new Router();
 const api = require(`../api`).getAPI();
 
 const ARTICLES_PER_PAGE = 8;
+const ARTICLES_MOST_POPULAR = 4;
+const LAST_COMMENTS = 4;
 
 mainRouter.get(`/`, async (req, res) => {
   const {user} = req.session;
@@ -17,19 +19,22 @@ mainRouter.get(`/`, async (req, res) => {
   page = +page;
 
   const limit = ARTICLES_PER_PAGE;
+  const limitPopular = ARTICLES_MOST_POPULAR;
+  const limitLastComments = LAST_COMMENTS;
 
   const offset = (page - 1) * ARTICLES_PER_PAGE;
 
   const [
-    {count, articles},
+    {articles, lastComments},
     categories
   ] = await Promise.all([
-    api.getArticles({limit, offset, needComments: true}),
+    api.getArticles({limit, offset, needComments: true, limitPopular, limitLastComments}),
     api.getCategories(true)
   ]);
 
-  const totalPages = Math.ceil(count / ARTICLES_PER_PAGE);
-  res.render(`main`, {articles, page, totalPages, categories, user});
+  const totalPages = Math.ceil(articles.all.count / ARTICLES_PER_PAGE);
+
+  res.render(`main`, {articles, lastComments, page, totalPages, categories, user});
 });
 
 mainRouter.get(`/register`, (req, res) => {

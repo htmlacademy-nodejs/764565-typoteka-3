@@ -1,0 +1,10 @@
+section.main-page__hot.hot
+	h2.hot__name
+		| Самое обсуждаемое 
+		span.hot__icon.hot__icon--fire
+	ul.hot__list
+		each article of articles.commented
+			li.hot__list-item
+				a.hot__list-link(href=`/articles/${article.articleId}`) 
+					| #{article.announce.length > 100 ? article.announce.slice(0, MAX_TEXT_LENGTH).concat(`...`) : article.announce}
+					sup.hot__link-sup #{article.commentsCount}
