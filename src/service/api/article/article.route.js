@@ -14,8 +14,14 @@ module.exports = (app, articleService, commentService) => {
   app.use(`/articles`, route);
 
   route.get(`/`, async (req, res) => {
-    const {offset, limit, needComments, limitPopular, limitLastComments} = req.query;
+    const {offset, limit, userId, needComments, limitPopular, limitLastComments} = req.query;
     let articles = {};
+
+    if (userId) {
+      articles.current = await articleService.findAll({userId, needComments});
+      return res.status(HttpCode.OK).json(articles);
+    }
+
     let lastComments;
     articles.all = await articleService.findAll({limit, offset, needComments});
 
@@ -23,14 +29,15 @@ module.exports = (app, articleService, commentService) => {
 
     lastComments = await commentService.findLast({limitLastComments});
 
-    res.status(HttpCode.OK).json({articles, lastComments});
+    return res.status(HttpCode.OK).json({articles, lastComments});
+
   });
 
   route.get(`/:articleId`, validatorRoute, async (req, res) => {
     const {articleId} = req.params;
     const {needComments} = req.query;
 
-    const article = await articleService.findOne(articleId, needComments);
+    const article = await articleService.findOne({articleId, needComments});
     if (article) {
       return res.status(HttpCode.OK)
         .json(article);
@@ -42,13 +49,15 @@ module.exports = (app, articleService, commentService) => {
 
   route.post(`/`, validatorDate(editArticleValidator), async (req, res) => {
     const article = await articleService.create(req.body);
+
     return res.status(HttpCode.CREATED)
       .json(article);
   });
 
   route.put(`/:articleId`, [validatorRoute, validatorDate(editArticleValidator)], async (req, res) => {
     const {articleId} = req.params;
-    const existArticle = await articleService.findOne(articleId);
+
+    const existArticle = await articleService.findOne({articleId});
 
     if (existArticle) {
       const updatedArticle = await articleService.update(articleId, req.body);

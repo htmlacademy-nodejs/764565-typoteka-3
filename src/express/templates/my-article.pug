@@ -1,0 +1,16 @@
+extends layout.pug
+
+block content
+  main.main-page.main-page--padding
+    section.main-page__notes.notes
+      h1.notes__title Мои записи
+      if articles.current.length > 0
+        ul.notes__list
+          each article of articles.current
+            li.notes__list-item
+              time.notes__item-time(datetime='2019-03-21T20:33') #{article.createdAt}
+              a.notes__item-text(href=`/articles/${article.id}`) #{article.title}
+              button.notes__button.button.button--close-item(type='button')
+                span.visually-hidden Закрыть строку списка
+      else
+        p Статей пока нет

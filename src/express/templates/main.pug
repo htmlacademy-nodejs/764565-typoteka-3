@@ -14,14 +14,15 @@ block content
     p
       | Это приветственный текст, который владелец блога может выбрать, чтобы описать себя 👏
     if (articles.all.articles.length > 0)
-      include partials/categories.pug
-      if (articles.commented.length > 0)
-        .main-page__section-flex
-          include partials/articles-discussed.pug
-          include partials/articles-comments.pug
-      else
-        include partials/articles-no-comments.pug
-      include partials/articles-all.pug
+      section.main-page__theme-list
+        include partials/categories.pug
+        if (articles.commented.length > 0)
+          .main-page__section-flex
+            include partials/articles-discussed.pug
+            include partials/articles-comments.pug
+        else
+          include partials/articles-no-comments.pug
+        include partials/articles-main.pug        
     else
-      include partials/main-empty.pug     
-    
+      include partials/main-empty.pug
+      

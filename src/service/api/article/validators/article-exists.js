@@ -4,7 +4,7 @@ const {HttpCode} = require(`../../../../constants`);
 
 module.exports = (service) => async (req, res, next) => {
   const {articleId} = req.params;
-  const article = await service.findOne(articleId);
+  const article = await service.findOne({articleId});
 
   if (article) {
     return next();

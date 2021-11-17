@@ -31,20 +31,26 @@ class ArticleService {
     return !!deletedRows;
   }
 
-  findOne(id, needComments) {
-    const include = [
-      Aliase.CATEGORIES,
-      {
-        model: this._User,
-        as: Aliase.USERS,
-        attributes: {
-          exclude: [`passwordHash`]
+  async findOne({articleId, needComments}) {
+    console.log({articleId});
+    const options = {
+      include: [
+        Aliase.CATEGORIES,
+        {
+          model: this._User,
+          as: Aliase.USERS,
+          attributes: {
+            exclude: [`passwordHash`]
+          }
         }
-      }
-    ];
+      ],
+      where: [{
+        id: articleId
+      }]
+    };
 
     if (needComments) {
-      include.push({
+      options.include.push({
         model: this._Comment,
         as: Aliase.COMMENTS,
         include: [
@@ -57,8 +63,12 @@ class ArticleService {
           }
         ]
       });
+
+      options.order = [
+        [{model: this._Comment, as: Aliase.COMMENTS}, `createdAt`, `DESC`]
+      ];
     }
-    return this._Article.findByPk(id, {include});
+    return await this._Article.findOne(options);
   }
 
   async findAll({limit, offset, needComments}) {
