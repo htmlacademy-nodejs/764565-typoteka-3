@@ -4,6 +4,7 @@ const express = require(`express`);
 const routes = require(`../api/index.route`);
 const {getLogger} = require(`../lib/logger`);
 const sequelize = require(`../api/sequelize`);
+const boolParser = require('express-query-boolean');
 
 const {HttpCode, API_PREFIX} = require(`../../constants`);
 
@@ -14,6 +15,8 @@ const logger = getLogger({name: `api`});
 const app = express();
 
 app.use(express.json());
+
+app.use(boolParser());
 
 app.use((req, res, next) => {
   logger.debug(`Request on route ${req.url}`);

@@ -113,9 +113,11 @@ mainRouter.get(`/categories`, auth, async (req, res) => {
 });
 
 mainRouter.post(`/categories/:id`, auth, async (req, res) => {
+  console.log(`!!!!!!!!!!!!!`);
   const {user} = req.session;
   const {body} = req;
   const {id} = req.params;
+  console.log(req.body);
 
   const categoryData = {
     name: body[`category-${id}`],
@@ -123,7 +125,9 @@ mainRouter.post(`/categories/:id`, auth, async (req, res) => {
   };
 
   try {
-    await api.editCategory(id, categoryData);
+    if (req.body.save) {
+      await api.editCategory(id, categoryData);
+    }
     res.redirect(`/categories`);
   } catch (errors) {
     const validationMessages = prepareErrors(errors);
@@ -138,6 +142,7 @@ mainRouter.post(`/categories`, auth, async (req, res) => {
     name: body[`add-category`]
   };
   try {
+    console.log(categoryData);
     await api.createCategory(categoryData);
     res.redirect(`/categories`);
   } catch (errors) {

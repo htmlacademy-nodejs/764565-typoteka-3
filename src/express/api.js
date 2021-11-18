@@ -37,6 +37,7 @@ class API {
   }
 
   async getCategories({withCount}) {
+    console.log(typeof withCount);
     return this._load(`/categories`, {params: {withCount}});
   }
 

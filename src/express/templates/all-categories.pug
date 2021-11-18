@@ -17,5 +17,5 @@ block content
               input#modify-form-category-1(type='text' name=`category-${category.id}` value=`${category.name}`)
               label(for=`modify-form-category-${category.id}`)
                 span.visually-hidden Редактировать категорию
-              button.category__button.button.button--category(type='submit') Сохранить
-              button.category__button.button.button--category(type='button') Удалить
+              button.category__button.button.button--category(type='submit' name='save' value='save') Сохранить
+              button.category__button.button.button--category(type='submit' name='delete' value='delete') Удалить
