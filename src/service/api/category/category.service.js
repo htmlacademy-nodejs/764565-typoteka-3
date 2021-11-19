@@ -12,8 +12,6 @@ class CategoryService {
   }
 
   async create(category) {
-    console.log(`----111111111111111111111111111111`);
-    console.log(category);
     return this._Category.create(category);
   }
 
@@ -24,10 +22,15 @@ class CategoryService {
     return !!affectedRows;
   }
 
+  async drop(id) {
+    const deletedRows = await this._Category.destroy({
+      where: {id}
+    });
+    return !!deletedRows;
+  }
+
   async findAll(needCount) {
-    console.log(typeof needCount);
     if (needCount) {
-      console.log(`TRUUUUE`);
       const result = await this._Category.findAll({
         attributes: [
           `id`,
@@ -51,8 +54,11 @@ class CategoryService {
       });
       return result.map((it) => it.get());
     } else {
-      console.log(`FAAAALSE`);
-      return this._Category.findAll({raw: true});
+      return this._Category.findAll({
+        order: [
+          [`createdAt`, `DESC`]
+        ],
+        raw: true});
     }
   }
 

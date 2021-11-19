@@ -34,14 +34,11 @@ block content
                       input.visually-hidden(type='file' name='upload')
                       | Обзор
                 .new-publication__category-wrapper
-                  - var isArticleCategory = article.category
-                  if isArticleCategory
-                  each category of article.categories
-                    div.new-publication__checkbox.new-publication__checkbox--auto
-                      label
-                        input.visually-hidden(value=category.id checked type='checkbox' name=`category`)
-                        | #{category.name}
-                  a.new-publication__form-link.button.button--transparent(href='#') Добавить категорию
+                  each category of categories
+                    - const isChecked = article.categories.some(item => item.id === category.id)
+                    div.new-publication__checkbox.new-publication__checkbox--auto                      
+                      input.visually-hidden(value=category.id id=`category-${category.id}` type='checkbox' name=`category` checked=isChecked)
+                      label(for=`category-${category.id}`) #{category.name}
               .form__wrapper.form__wrapper--text
                 .form__field.form__field--publication-text
                   label

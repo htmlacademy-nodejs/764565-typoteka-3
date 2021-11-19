@@ -28,7 +28,7 @@ class API {
     return this._load(`/articles/${id}`, {params: {needComments}});
   }
 
-  async search(query) {
+  async search({query}) {
     return this._load(`/search`, {params: {query}});
   }
 
@@ -37,11 +37,10 @@ class API {
   }
 
   async getCategories({withCount}) {
-    console.log(typeof withCount);
     return this._load(`/categories`, {params: {withCount}});
   }
 
-  async creatArticle(data) {
+  async createArticle(data) {
     return this._load(`/articles`, {
       method: HttpMethod.POST,
       data
@@ -73,6 +72,12 @@ class API {
     return this._load(`/categories`, {
       method: HttpMethod.POST,
       data
+    });
+  }
+
+  removeCategory(id) {
+    return this._load(`/categories/${id}`, {
+      method: HttpMethod.DELETE
     });
   }
 

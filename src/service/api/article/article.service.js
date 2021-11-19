@@ -17,11 +17,22 @@ class ArticleService {
     return article.get();
   }
 
-  async update(id, article) {
-    const [affectedRows] = await this._Article.update(article, {
-      where: {id}
+  async update({id, article}) {
+    const affectedRows = await this._Article.update(article, {
+      where: {
+        id,
+      }
     });
+    const updatedArticle = await this._Article.findOne({
+      where: {
+        id,
+      }
+    });
+
+    await updatedArticle.setCategories(article.categories);
+
     return !!affectedRows;
+
   }
 
   async drop(id) {
@@ -32,7 +43,6 @@ class ArticleService {
   }
 
   async findOne({articleId, needComments}) {
-    console.log({articleId});
     const options = {
       include: [
         Aliase.CATEGORIES,

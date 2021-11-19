@@ -8,9 +8,7 @@ const api = require(`../api`).getAPI();
 
 myRouter.get(`/`, auth, async (req, res) => {
   const {user} = req.session;
-  console.log({user});
   const articles = await api.getArticles({userId: user.id});
-  console.log(articles);
   res.render(`my-article`, {articles, user});
 });
 

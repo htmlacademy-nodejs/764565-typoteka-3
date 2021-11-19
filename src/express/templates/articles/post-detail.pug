@@ -24,7 +24,7 @@ block content
                     sup #{category.count}
                   button.themes__remove-btn(type='button') Удалить категорию              
           .post__picture
-            img(src='/img/sea-fullsize@1x.jpg' alt='пейзаж море, скалы, пляж')
+            +insertArticleFullImage(article)
           .post__text
             p
               | #{article.announce}

@@ -84,19 +84,18 @@ articlesRouter.get(`/add`, auth, csrfProtection, async (req, res) => {
 });
 
 
-articlesRouter.post(`/add`, auth, upload.single(`avatar`), csrfProtection, async (req, res) => {
+articlesRouter.post(`/add`, auth, upload.single(`upload`), csrfProtection, async (req, res) => {
   const {user} = req.session;
   const {body, file} = req;
   const articleData = {
     picture: file ? file.filename : ``,
     title: body.title,
-    category: ensureArray(body.category),
-    announce: body.announce,
-    fullText: body.fullText,
+    categories: ensureArray(body.category).map((item) => parseInt(item, 10)),
+    announce: body.announcement,
+    description: body.fulltext,
     userId: user.id
   };
   try {
-    console.log(articleData);
     await api.createArticle(articleData);
     res.redirect(`/my`);
   } catch (errors) {
@@ -110,19 +109,21 @@ articlesRouter.get(`/edit/:id`, auth, csrfProtection, async (req, res) => {
   const {user} = req.session;
   const {id} = req.params;
   const [article, categories] = await getEditArticleData(id);
+  console.log(article);
   res.render(`articles/post`, {id, article, categories, user, csrfToken: req.csrfToken()});
 });
 
-articlesRouter.post(`/edit/:id`, auth, upload.single(`avatar`), csrfProtection, async (req, res) => {
+articlesRouter.post(`/edit/:id`, auth, upload.single(`upload`), csrfProtection, async (req, res) => {
   const {user} = req.session;
   const {body, file} = req;
   const {id} = req.params;
+
   const articleData = {
     picture: file ? file.filename : ``,
     description: body.fulltext,
     announce: body.announcement,
     title: body.title,
-    category: ensureArray(body.category),
+    categories: ensureArray(body.category).map((item) => parseInt(item, 10)),
     userId: user.id
   };
 

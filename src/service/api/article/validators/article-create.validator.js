@@ -13,7 +13,7 @@ const ErrorArticleMessage = {
 };
 
 module.exports = Joi.object({
-  category: Joi.array().items(
+  categories: Joi.array().items(
       Joi.number().integer().positive().messages({
         'number.base': ErrorArticleMessage.CATEGORIES
       })

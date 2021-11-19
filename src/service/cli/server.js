@@ -4,7 +4,7 @@ const express = require(`express`);
 const routes = require(`../api/index.route`);
 const {getLogger} = require(`../lib/logger`);
 const sequelize = require(`../api/sequelize`);
-const boolParser = require('express-query-boolean');
+const boolParser = require(`express-query-boolean`);
 
 const {HttpCode, API_PREFIX} = require(`../../constants`);
 

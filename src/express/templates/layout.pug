@@ -18,11 +18,22 @@ doctype html
         margin: 20px 0;
         padding: 10px;
       }
+      .new-publication__category-wrapper input:checked~label {
+        border: 2px solid blue;
+      }
+      .image__small--size {
+        height: 240px;
+        margin: auto;
+      }
   body
     mixin insertErrorMessage(messages)
       if messages
         each message of messages
           .server-error= message    
+    mixin insertArticleFullImage(article)
+      img(src=`/img/${article.picture ? article.picture : 'sea-fullsize@1x.jpg'}` alt=article.title)
+    mixin insertArticleSmallImage(article)
+      img.preview__background-image.image__small--size(src=`/img/${article.picture ? article.picture : 'sea-fullsize@1x.jpg'}` alt=article.title)
     mixin pagination(page, totalPages, width, prefix)
       -
         let start = page - width;

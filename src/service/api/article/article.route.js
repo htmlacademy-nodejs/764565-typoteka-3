@@ -2,6 +2,7 @@
 
 const {Router} = require(`express`);
 const {HttpCode} = require(`../../../constants`);
+const createArticleValidator = require(`./validators/article-create.validator`);
 const editArticleValidator = require(`./validators/article-edit.validator`);
 const validatorDate = require(`../../middlewares/validator-data`);
 const validatorRoute = require(`../../middlewares/validator-route`);
@@ -47,7 +48,7 @@ module.exports = (app, articleService, commentService) => {
     }
   });
 
-  route.post(`/`, validatorDate(editArticleValidator), async (req, res) => {
+  route.post(`/`, validatorDate(createArticleValidator), async (req, res) => {
     const article = await articleService.create(req.body);
 
     return res.status(HttpCode.CREATED)
@@ -58,9 +59,10 @@ module.exports = (app, articleService, commentService) => {
     const {articleId} = req.params;
 
     const existArticle = await articleService.findOne({articleId});
+    console.log(req.body);
 
     if (existArticle) {
-      const updatedArticle = await articleService.update(articleId, req.body);
+      const updatedArticle = await articleService.update({id: articleId, article: req.body});
       return res.status(HttpCode.OK)
         .json(updatedArticle);
     } else {

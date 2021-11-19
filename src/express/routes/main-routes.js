@@ -71,6 +71,7 @@ mainRouter.get(`/login`, (req, res) => {
 mainRouter.post(`/login`, async (req, res) => {
   try {
     const user = await api.auth(req.body.email, req.body.password);
+    console.log(user);
     req.session.user = user;
     req.session.save(() => {
       res.redirect(`/`);
@@ -89,17 +90,20 @@ mainRouter.get(`/logout`, (req, res) => {
 
 mainRouter.get(`/search`, async (req, res) => {
   const {user} = req.session;
+  const {query} = req.query;
+
   try {
-    const {query} = req.query;
-    const results = await api.search(query);
+    const result = await api.search({query});
 
     res.render(`search`, {
-      results,
+      query,
+      result,
       user
     });
   } catch (error) {
     res.render(`search`, {
-      results: [],
+      query,
+      result: [],
       user
     });
   }
@@ -113,11 +117,9 @@ mainRouter.get(`/categories`, auth, async (req, res) => {
 });
 
 mainRouter.post(`/categories/:id`, auth, async (req, res) => {
-  console.log(`!!!!!!!!!!!!!`);
   const {user} = req.session;
   const {body} = req;
   const {id} = req.params;
-  console.log(req.body);
 
   const categoryData = {
     name: body[`category-${id}`],
@@ -127,9 +129,12 @@ mainRouter.post(`/categories/:id`, auth, async (req, res) => {
   try {
     if (req.body.save) {
       await api.editCategory(id, categoryData);
+    } else if (req.body.delete) {
+      await api.removeCategory(id);
     }
     res.redirect(`/categories`);
   } catch (errors) {
+    console.log(errors);
     const validationMessages = prepareErrors(errors);
     const categories = await api.getCategories({withCount: false});
     res.render(`all-categories`, {categories, user, validationMessages});
@@ -137,20 +142,20 @@ mainRouter.post(`/categories/:id`, auth, async (req, res) => {
 });
 
 mainRouter.post(`/categories`, auth, async (req, res) => {
+  console.log(`add FORM`);
+  const {user} = req.session;
   const {body} = req;
   const categoryData = {
-    name: body[`add-category`]
+    name: body[`add-category`],
+    userId: user.id
   };
   try {
-    console.log(categoryData);
     await api.createCategory(categoryData);
     res.redirect(`/categories`);
   } catch (errors) {
-    console.log(errors);
-    //const validationMessages = prepareErrors(errors);
-    //const [article, articleCategories] = await getViewArticleData(id);
-
-    //res.render(`articles/post-detail`, {article, id, articleCategories, user, validationMessages, csrfToken: req.csrfToken()});
+    const validationMessages = prepareErrors(errors);
+    const categories = await api.getCategories({withCount: false});
+    res.render(`all-categories`, {categories, validationMessages});
   }
 });
 

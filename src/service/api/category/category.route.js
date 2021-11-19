@@ -1,6 +1,10 @@
 'use strict';
 
 const {Router} = require(`express`);
+const validatorDate = require(`../../middlewares/validator-data`);
+const categoryCreateValidator = require(`./validators/category-create.validator`);
+const categoryEditValidator = require(`./validators/category-create.validator`);
+const categoryUses = require(`./validators/category-uses`);
 const {HttpCode} = require(`../../../constants`);
 
 module.exports = (app, service) => {
@@ -10,14 +14,13 @@ module.exports = (app, service) => {
 
   route.get(`/`, async (req, res) => {
     const {withCount} = req.query;
-    console.log(`-------------------`);
-    console.log(JSON.parse(JSON.stringify(req.query)));
     const categories = await service.findAll(withCount);
+
     res.status(HttpCode.OK)
       .json(categories);
   });
 
-  route.post(`/`, async (req, res) => {
+  route.post(`/`, validatorDate(categoryCreateValidator), async (req, res) => {
     const category = await service.create(req.body);
 
     return res.status(HttpCode.CREATED)
@@ -40,7 +43,7 @@ module.exports = (app, service) => {
       });
   });
 
-  route.put(`/:categoryId`, async (req, res) => {
+  route.put(`/:categoryId`, validatorDate(categoryEditValidator), async (req, res) => {
     const {categoryId} = req.params;
 
     const existCategory = await service.findOne(categoryId);
@@ -52,6 +55,19 @@ module.exports = (app, service) => {
     } else {
       return res.status(HttpCode.NOT_FOUND)
         .send(`Not found with ${categoryId}`);
+    }
+  });
+
+  route.delete(`/:categoryId`, categoryUses(service), async (req, res) => {
+    const {categoryId} = req.params;
+    const deleted = await service.drop(categoryId);
+
+    if (deleted) {
+      return res.status(HttpCode.OK)
+        .json(deleted);
+    } else {
+      return res.status(HttpCode.NOT_FOUND)
+      .send(`Not found`);
     }
   });
 };
