@@ -108,8 +108,8 @@ describe(`API returns a list of all articles`, () => {
   });
 
   test(`Status code 200`, () => expect(response.statusCode).toBe(HttpCode.OK));
-  test(`Returns a list of 2 articles`, () => expect(response.body.articles.length).toBe(2));
-  test(`First article's title equals "Самый лучший музыкальный альбом этого года"`, () => expect(response.body.articles[0].title).toBe(`Самый лучший музыкальный альбом этого года`));
+  test(`Returns a list of 2 articles`, () => expect(response.body.articles.all.articles.length).toBe(2));
+  test(`First article's title equals "Самый лучший музыкальный альбом этого года"`, () => expect(response.body.articles.all.articles[0].title).toBe(`Самый лучший музыкальный альбом этого года`));
 });
 
 describe(`API returns an article with given id`, () => {
@@ -133,7 +133,7 @@ describe(`API creates an article`, () => {
       title: `Рок — это протест Рок — это протест Рок — это протест Рок — это протест`,
       userId: 1,
       announce: `Это революционный взгляд на жизнь и на людей о революционный взгляд на жизнь и на людей `,
-      category: [1],
+      categories: [1],
       description: `Таких масштабных экспериментов ещё не было! Научный мир до сих пор спорит и полученных результатах`
     };
 
@@ -151,11 +151,10 @@ describe(`API creates an article`, () => {
         .send(newArticle);
     });
 
-
     test(`Status code 201`, () => expect(response.statusCode).toBe(HttpCode.CREATED));
     test(`Article's id is defined`, () => expect(response.body.id).toBeDefined());
     test(`Article's data match`, async () => {
-      await expect(dataService.findOne(response.body.id)).resolves.toMatchObject({
+      await expect(dataService.findOne({articleId: response.body.id})).resolves.toMatchObject({
         title: `Рок — это протест Рок — это протест Рок — это протест Рок — это протест`
       }
       );
@@ -181,7 +180,7 @@ describe(`API creates an article`, () => {
       userId: 1,
       announce: `Это революционный взгляд на жизнь и на людей`,
       description: `Таких масштабных экспериментов ещё не было! Научный мир до сих пор спорит и полученных результатах`,
-      category: [1, 2]
+      categories: [1, 2]
     };
 
     let app;
@@ -219,7 +218,7 @@ describe(`API changes article`, () => {
       userId: 1,
       announce: `Это революционный взгляд на жизнь и на людей`,
       description: `Таких масштабных экспериментов ещё не было! Научный мир до сих пор спорит и полученных результатах`,
-      category: [1, 2]
+      categories: [1, 2]
     };
 
     let app;
@@ -238,7 +237,7 @@ describe(`API changes article`, () => {
     test(`Status code 200`, () => expect(response.statusCode).toBe(HttpCode.OK));
     test(`Returns changed article`, () => expect(response.body).toBeTruthy());
     test(`Article is really changed`, async () => {
-      await expect(dataService.findOne(1)).resolves.toMatchObject({title: `Музыка жизни Музыка жизни Музыка жизни Музыка жизни`});
+      await expect(dataService.findOne({articleId: 1})).resolves.toMatchObject({title: `Музыка жизни Музыка жизни Музыка жизни Музыка жизни`});
     });
   });
 
@@ -281,7 +280,7 @@ describe(`API changes article`, () => {
 
     test(`API returns status code 400`, () => {
       return request(app)
-        .put(`/articles/100`)
+        .put(`/articles/1`)
         .send(invalidArticle)
         .expect(HttpCode.BAD_REQUEST);
     });
@@ -304,7 +303,7 @@ describe(`API deletes an article`, () => {
 
     test(`Status code 200`, () => expect(response.statusCode).toBe(HttpCode.OK));
     test(`Returns deleted article`, () => expect(response.body).toBeTruthy());
-    test(`Article not exists`, async () => await expect(dataService.findOne(1)).resolves.toBeNull());
+    test(`Article not exists`, async () => await expect(dataService.findOne({articleId: 1})).resolves.toBeNull());
   });
 
   describe(`API refuses to delete non-existent article`, () => {
@@ -446,3 +445,4 @@ describe(`API refuses to delete a comment`, () => {
     });
   });
 });
+

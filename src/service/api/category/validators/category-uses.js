@@ -9,7 +9,7 @@ module.exports = (service) => async (req, res, next) => {
   if (count === 0) {
     return next();
   } else {
-    return res.status(HttpCode.NOT_FOUND)
+    return res.status(HttpCode.FORBIDDEN)
       .send(`Category with Id=${categoryId} uses in ${count} articles`);
   }
 };

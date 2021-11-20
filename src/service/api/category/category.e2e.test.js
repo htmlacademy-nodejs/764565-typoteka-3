@@ -99,3 +99,87 @@ describe(`API returns category list`, () => {
       )
   );
 });
+
+describe(`API creates a category`, () => {
+  describe(`API creates a category if data is valid`, () => {
+    const newCategory = {
+      userId: 2,
+      name: `Подушки`
+    };
+
+    let response;
+
+    beforeAll(async () => {
+      response = await request(app)
+        .post(`/categories/`)
+        .send(newCategory);
+    });
+
+    test(`Status code 201`, () => expect(response.statusCode).toBe(HttpCode.CREATED));
+    test(`Returns category created`, () => expect(response.body).toBeDefined());
+  });
+
+  describe(`API refuses to create a category when data is invalid, and returns status code 400`, () => {
+    test(`API returns status code 400`, () => {
+      return request(app)
+        .post(`/categories/`)
+        .send({})
+        .expect(HttpCode.BAD_REQUEST);
+    });
+  });
+});
+
+describe(`API changes category`, () => {
+  describe(`API changes existent article`, () => {
+    const newCategory = {
+      userId: 2,
+      name: `Подушки`
+    };
+
+    let response;
+
+    beforeAll(async () => {
+      response = await request(app)
+        .put(`/categories/2`)
+        .send(newCategory);
+    });
+
+    test(`Status code 200`, () => expect(response.statusCode).toBe(HttpCode.OK));
+    test(`Returns changed category`, () => expect(response.body).toBeTruthy());
+  });
+
+  describe(`API returns status code 404 when trying to change non-existent category`, () => {
+    const validCategory = {
+      userId: 2,
+      name: `Подушки`
+    };
+
+    test(`API returns status code 404`, () => {
+      return request(app)
+        .put(`/categories/150`)
+        .send(validCategory)
+        .expect(HttpCode.NOT_FOUND);
+    });
+  });
+
+  test(`API returns status code 400 when trying to change an category with invalid data`, () => {
+    return request(app)
+      .put(`/categories/1`)
+      .send({})
+      .expect(HttpCode.BAD_REQUEST);
+  });
+});
+
+describe(`API refuses to delete a category`, () => {
+  test(`API deletes used category and returns status code 403 `, () => {
+    return request(app)
+      .delete(`/categories/1`)
+      .expect(HttpCode.FORBIDDEN);
+  });
+
+  test(`API refuses to delete non-existent category and returns status code 404`, () => {
+    return request(app)
+      .delete(`/categories/10`)
+      .expect(HttpCode.NOT_FOUND);
+  });
+});

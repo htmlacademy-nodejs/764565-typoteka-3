@@ -60,7 +60,6 @@ module.exports = (app, articleService, commentService) => {
 
   route.delete(`/:articleId`, validatorRoute, async (req, res) => {
     const {articleId} = req.params;
-    const {userId} = req.body;
 
     const article = await articleService.findOne({articleId});
 
@@ -69,7 +68,7 @@ module.exports = (app, articleService, commentService) => {
         .send(`Not found`);
     }
 
-    const deletedArticle = await articleService.drop({userId, articleId});
+    const deletedArticle = await articleService.drop({articleId});
 
     if (!deletedArticle) {
       return res.status(HttpCode.FORBIDDEN)

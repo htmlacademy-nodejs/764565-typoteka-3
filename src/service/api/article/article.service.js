@@ -35,11 +35,10 @@ class ArticleService {
 
   }
 
-  async drop({userId, articleId}) {
+  async drop({articleId}) {
     const deletedRow = await this._Article.destroy({
       where: {
-        id: articleId,
-        userId
+        id: articleId
       }
     });
 
