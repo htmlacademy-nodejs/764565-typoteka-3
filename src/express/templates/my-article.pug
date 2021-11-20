@@ -3,14 +3,16 @@ extends layout.pug
 block content
   main.main-page.main-page--padding
     section.main-page__notes.notes
-      h1.notes__title Мои записи
-      if articles.current.length > 0
+      h1.notes__title Публикации
+      if (articles.all.articles.length > 0)
         ul.notes__list
-          each article of articles.current
-            li.notes__list-item
-              time.notes__item-time(datetime='2019-03-21T20:33') #{article.createdAt}
+          each article of articles.all.articles
+            li.notes__list-item              
+              time.notes__item-time(datetime='2019-03-21T20:33') #{formatDate(article.createdAt)}
               a.notes__item-text(href=`/articles/${article.id}`) #{article.title}
-              button.notes__button.button.button--close-item(type='button')
+              a.notes__button.button.button--edit-item(href=`/articles/edit/${article.id}`)
+                span.visually-hidden Редактировать публикацию
+              a.notes__button.button.button--close-item(href=`/articles/delete/${article.id}`)
                 span.visually-hidden Закрыть строку списка
       else
         p Статей пока нет

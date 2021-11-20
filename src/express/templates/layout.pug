@@ -25,11 +25,35 @@ doctype html
         height: 240px;
         margin: auto;
       }
+      .image__avatar--size {
+        border-radius: 50px;
+        height: 100%;
+      }
+      .button--edit-item {
+        right: 50px;
+        width: 30px;
+        height: 35px;
+        border-radius: 0%;
+        border: 0;
+        background: url(../img/icons/page.svg) no-repeat center;
+        background-color: #bdbdbd;
+      }
   body
+    -
+      const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleString('ru-RU', {day: '2-digit', month: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'});
+      }
     mixin insertErrorMessage(messages)
       if messages
         each message of messages
-          .server-error= message    
+          .server-error= message
+    mixin insertUserAvatarFullImage(user)
+      img.image__avatar--size(src=`/img/${user.avatar ? user.avatar : 'avatar-1.png'}` width='50' height='50' alt='Аватар пользователя')
+    mixin insertUserAvatarSmallImage(user)
+      img.image__avatar--size(src=`/img/${user.avatar ? user.avatar : 'avatar-1.png'}` width='20' height='20' alt='Аватар пользователя')
+    mixin insertUserAvatarMiniImage(user)
+      img.last__list-image(src=`/img/${user.avatar ? user.avatar : 'avatar-1.png'}` width='20' height='20' alt='Аватар пользователя')
     mixin insertArticleFullImage(article)
       img(src=`/img/${article.picture ? article.picture : 'sea-fullsize@1x.jpg'}` alt=article.title)
     mixin insertArticleSmallImage(article)
@@ -59,7 +83,7 @@ doctype html
           while i++ < end
             if (i === page)
               li.pagination__item.pagination__item--active
-                a(href=`${prefix}page=${i}`)= i
+                a()= i
             else
               li.pagination__item
                 a(class={} href=`${prefix}page=${i}`)= i

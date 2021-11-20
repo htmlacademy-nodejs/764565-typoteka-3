@@ -15,13 +15,8 @@ module.exports = (app, articleService, commentService) => {
   app.use(`/articles`, route);
 
   route.get(`/`, async (req, res) => {
-    const {offset, limit, userId, needComments, limitPopular, limitLastComments} = req.query;
+    const {offset, limit, needComments, limitPopular, limitLastComments} = req.query;
     let articles = {};
-
-    if (userId) {
-      articles.current = await articleService.findAll({userId, needComments});
-      return res.status(HttpCode.OK).json(articles);
-    }
 
     let lastComments;
     articles.all = await articleService.findAll({limit, offset, needComments});
@@ -55,33 +50,34 @@ module.exports = (app, articleService, commentService) => {
       .json(article);
   });
 
-  route.put(`/:articleId`, [validatorRoute, validatorDate(editArticleValidator)], async (req, res) => {
+  route.put(`/:articleId`, [validatorRoute, articleExist(articleService), validatorDate(editArticleValidator)], async (req, res) => {
     const {articleId} = req.params;
+    const updatedArticle = await articleService.update({id: articleId, article: req.body});
+    return res.status(HttpCode.OK)
+      .json(updatedArticle);
 
-    const existArticle = await articleService.findOne({articleId});
-    console.log(req.body);
-
-    if (existArticle) {
-      const updatedArticle = await articleService.update({id: articleId, article: req.body});
-      return res.status(HttpCode.OK)
-        .json(updatedArticle);
-    } else {
-      return res.status(HttpCode.NOT_FOUND)
-        .send(`Not found with ${articleId}`);
-    }
   });
 
   route.delete(`/:articleId`, validatorRoute, async (req, res) => {
     const {articleId} = req.params;
-    const article = await articleService.drop(articleId);
+    const {userId} = req.body;
 
-    if (article) {
-      return res.status(HttpCode.OK)
-        .json(article);
-    } else {
+    const article = await articleService.findOne({articleId});
+
+    if (!article) {
       return res.status(HttpCode.NOT_FOUND)
         .send(`Not found`);
     }
+
+    const deletedArticle = await articleService.drop({userId, articleId});
+
+    if (!deletedArticle) {
+      return res.status(HttpCode.FORBIDDEN)
+        .send(`Forbidden`);
+    }
+
+    return res.status(HttpCode.OK)
+      .json(deletedArticle);
   });
 
   route.get(`/:articleId/comments`, [validatorRoute, articleExist(articleService)], async (req, res) => {

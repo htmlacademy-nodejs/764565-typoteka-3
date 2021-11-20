@@ -1,11 +1,6 @@
 extends ../layout.pug
 
 block content
-  -
-    const formatDate = (dateString) => {
-      const date = new Date(dateString);
-      return date.toLocaleString('ru-RU', {day: '2-digit', month: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'});
-    }
   main
     section.post
       h1.visually-hidden Пост
@@ -19,7 +14,7 @@ block content
             ul.post__themes.themes
               each category of articleCategories
                 li.themes__item
-                  a.themes__item-link(href='#')
+                  a.themes__item-link(href=`/articles/categories/${category.id}`)
                     | #{category.name}
                     sup #{category.count}
                   button.themes__remove-btn(type='button') Удалить категорию              
@@ -40,11 +35,11 @@ block content
               each comment of article.comments
                 li.comments__comment
                   .comments__avatar.avatar
-                    img(src='/img/avatar-1.png' alt='аватар пользователя')
+                    +insertUserAvatarFullImage(comment.users)
                   .comments__text
                     .comments__head
                       p #{comment.users.firstName} #{comment.users.lastName} 
-                      time.comments__date(datetime='2019-03-21T20:33') #{comment.createdAt}
+                      time.comments__date(datetime=`${formatDate(comment.createdAt)}`) #{formatDate(comment.createdAt)}
                     p.comments__message #{comment.text}
           if user
             .comments__footer.comments__footer--user
@@ -52,7 +47,7 @@ block content
               form(action=`/articles/${id}/comments` method='POST' enctype="application/x-www-form-urlencoded" autocomplete="off")
                 input(type="hidden" name="_csrf" value=csrfToken)
                 .comments__avatar.avatar
-                  img(src='/img/avatar-2.png' alt='аватар пользователя')
+                  +insertUserAvatarFullImage(user)
                 label
                   textarea(rows='1' name='message' placeholder='Присоединиться к обсуждению')
                 button.comments__button.button.button--colored(type='submit') Опубликовать

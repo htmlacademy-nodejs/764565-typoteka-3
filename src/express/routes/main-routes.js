@@ -3,6 +3,7 @@
 const {Router} = require(`express`);
 const upload = require(`../middlewares/upload`);
 const auth = require(`../middlewares/auth`);
+const {checkAdminRole} = require(`../../utils`);
 const {prepareErrors} = require(`../../utils`);
 
 const mainRouter = new Router();
@@ -22,6 +23,8 @@ mainRouter.get(`/`, async (req, res) => {
   const limitPopular = ARTICLES_MOST_POPULAR;
   const limitLastComments = LAST_COMMENTS;
 
+  const isAdminUser = checkAdminRole(user);
+
   const offset = (page - 1) * ARTICLES_PER_PAGE;
 
   const [
@@ -34,7 +37,7 @@ mainRouter.get(`/`, async (req, res) => {
 
   const totalPages = Math.ceil(articles.all.count / ARTICLES_PER_PAGE);
 
-  res.render(`main`, {articles, lastComments, page, totalPages, categories, user});
+  res.render(`main`, {articles, lastComments, page, totalPages, categories, user, isAdminUser});
 });
 
 mainRouter.get(`/register`, (req, res) => {
@@ -42,7 +45,7 @@ mainRouter.get(`/register`, (req, res) => {
   res.render(`sign-up`, {user});
 });
 
-mainRouter.post(`/register`, upload.single(`avatar`), async (req, res) => {
+mainRouter.post(`/register`, upload.single(`upload`), async (req, res) => {
   const {user} = req.session;
   const {body, file} = req;
   const userData = {
@@ -71,7 +74,6 @@ mainRouter.get(`/login`, (req, res) => {
 mainRouter.post(`/login`, async (req, res) => {
   try {
     const user = await api.auth(req.body.email, req.body.password);
-    console.log(user);
     req.session.user = user;
     req.session.save(() => {
       res.redirect(`/`);
@@ -94,7 +96,6 @@ mainRouter.get(`/search`, async (req, res) => {
 
   try {
     const result = await api.search({query});
-
     res.render(`search`, {
       query,
       result,
@@ -111,9 +112,10 @@ mainRouter.get(`/search`, async (req, res) => {
 
 mainRouter.get(`/categories`, auth, async (req, res) => {
   const {user} = req.session;
+  const isAdminUser = checkAdminRole(user);
 
   const categories = await api.getCategories({withCount: false});
-  res.render(`all-categories`, {categories, user});
+  res.render(`all-categories`, {categories, user, isAdminUser});
 });
 
 mainRouter.post(`/categories/:id`, auth, async (req, res) => {
@@ -134,15 +136,14 @@ mainRouter.post(`/categories/:id`, auth, async (req, res) => {
     }
     res.redirect(`/categories`);
   } catch (errors) {
-    console.log(errors);
+    const isAdminUser = checkAdminRole(user);
     const validationMessages = prepareErrors(errors);
     const categories = await api.getCategories({withCount: false});
-    res.render(`all-categories`, {categories, user, validationMessages});
+    res.render(`all-categories`, {categories, user, isAdminUser, validationMessages});
   }
 });
 
 mainRouter.post(`/categories`, auth, async (req, res) => {
-  console.log(`add FORM`);
   const {user} = req.session;
   const {body} = req;
   const categoryData = {
@@ -153,9 +154,10 @@ mainRouter.post(`/categories`, auth, async (req, res) => {
     await api.createCategory(categoryData);
     res.redirect(`/categories`);
   } catch (errors) {
+    const isAdminUser = checkAdminRole(user);
     const validationMessages = prepareErrors(errors);
     const categories = await api.getCategories({withCount: false});
-    res.render(`all-categories`, {categories, validationMessages});
+    res.render(`all-categories`, {categories, user, isAdminUser, validationMessages});
   }
 });
 

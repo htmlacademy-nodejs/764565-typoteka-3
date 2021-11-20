@@ -1,13 +1,12 @@
 'use strict';
-const userAdmin = require(`../../constants`);
+const {checkAdminRole} = require(`../../utils`);
 
 module.exports = (req, res, next) => {
   const {user} = req.session;
-  console.log(user);
-  console.log(userAdmin.Admin);
 
-  if (user && user.id === userAdmin.ADMIN.userId) {
+  if (checkAdminRole(user)) {
     return next();
   }
+
   return res.redirect(`/login`);
 };

@@ -4,6 +4,7 @@ const {Router} = require(`express`);
 
 const upload = require(`../middlewares/upload`);
 const auth = require(`../middlewares/auth`);
+const {checkAdminRole} = require(`../../utils`);
 const csrf = require(`csurf`);
 const {ensureArray, prepareErrors} = require(`../../utils`);
 const {HttpCode} = require(`../../constants`);
@@ -33,7 +34,7 @@ const getViewArticleData = async (articleId) => {
     categories
   ] = await Promise.all([
     api.getArticle(articleId, {needComments: true}),
-    api.getCategories(true)
+    api.getCategories({withCount: true})
   ]);
 
   let articleCategories = categories.filter((item) => {
@@ -48,6 +49,8 @@ const getViewArticleData = async (articleId) => {
 articlesRouter.get(`/categories/:categoryId`, async (req, res) => {
   const {user} = req.session;
   const {categoryId} = req.params;
+
+  const isAdminUser = checkAdminRole(user);
 
   let {page = 1} = req.query;
   page = +page;
@@ -73,20 +76,23 @@ articlesRouter.get(`/categories/:categoryId`, async (req, res) => {
     articles,
     page,
     totalPages,
-    user
+    user,
+    isAdminUser
   });
 });
 
 articlesRouter.get(`/add`, auth, csrfProtection, async (req, res) => {
   const {user} = req.session;
+  const isAdminUser = checkAdminRole(user);
   const categories = await getAddArticleData();
-  res.render(`articles/post-new`, {categories, user, csrfToken: req.csrfToken()});
+  res.render(`articles/post-new`, {categories, user, isAdminUser, csrfToken: req.csrfToken()});
 });
 
 
 articlesRouter.post(`/add`, auth, upload.single(`upload`), csrfProtection, async (req, res) => {
   const {user} = req.session;
   const {body, file} = req;
+  const isAdminUser = checkAdminRole(user);
   const articleData = {
     picture: file ? file.filename : ``,
     title: body.title,
@@ -101,22 +107,24 @@ articlesRouter.post(`/add`, auth, upload.single(`upload`), csrfProtection, async
   } catch (errors) {
     const validationMessages = prepareErrors(errors);
     const categories = await getAddArticleData();
-    res.render(`articles/post-new`, {categories, user, validationMessages, csrfToken: req.csrfToken()});
+    res.render(`articles/post-new`, {categories, user, isAdminUser, validationMessages, csrfToken: req.csrfToken()});
   }
 });
 
 articlesRouter.get(`/edit/:id`, auth, csrfProtection, async (req, res) => {
   const {user} = req.session;
   const {id} = req.params;
+  const isAdminUser = checkAdminRole(user);
   const [article, categories] = await getEditArticleData(id);
-  console.log(article);
-  res.render(`articles/post`, {id, article, categories, user, csrfToken: req.csrfToken()});
+  res.render(`articles/post`, {id, article, categories, user, isAdminUser, csrfToken: req.csrfToken()});
 });
 
 articlesRouter.post(`/edit/:id`, auth, upload.single(`upload`), csrfProtection, async (req, res) => {
   const {user} = req.session;
   const {body, file} = req;
   const {id} = req.params;
+
+  const isAdminUser = checkAdminRole(user);
 
   const articleData = {
     picture: file ? file.filename : ``,
@@ -133,22 +141,42 @@ articlesRouter.post(`/edit/:id`, auth, upload.single(`upload`), csrfProtection, 
   } catch (errors) {
     const validationMessages = prepareErrors(errors);
     const [article, categories] = await getEditArticleData(id);
-    res.render(`articles/post`, {id, article, categories, user, validationMessages, csrfToken: req.csrfToken()});
+    res.render(`articles/post`, {id, article, categories, user, isAdminUser, validationMessages, csrfToken: req.csrfToken()});
   }
 });
 
 articlesRouter.get(`/:id`, csrfProtection, async (req, res) => {
   const {user} = req.session;
   const {id} = req.params;
-  const [article, articleCategories] = await getViewArticleData(id);
 
-  res.render(`articles/post-detail`, {article, id, articleCategories, user, csrfToken: req.csrfToken()});
+  const isAdminUser = checkAdminRole(user);
+
+  const [article, articleCategories] = await getViewArticleData(id);
+  console.log([article, articleCategories]);
+
+  res.render(`articles/post-detail`, {article, id, articleCategories, user, isAdminUser, csrfToken: req.csrfToken()});
+});
+
+articlesRouter.get(`/delete/:id`, auth, async (req, res) => {
+  const {user} = req.session;
+  const {id} = req.params;
+
+  try {
+    await api.removeArticle({id, userId: user.id});
+    res.status(HttpCode.OK);
+    res.redirect(`/my`);
+  } catch (errors) {
+    res.status(errors.response.status).send(errors.response.statusText);
+  }
 });
 
 articlesRouter.post(`/:id/comments`, csrfProtection, async (req, res) => {
   const {user} = req.session;
   const {id} = req.params;
   const {message} = req.body;
+
+  const isAdminUser = checkAdminRole(user);
+
   try {
     await api.createComment(id, {userId: user.id, text: message});
     res.redirect(`/articles/${id}`);
@@ -156,7 +184,7 @@ articlesRouter.post(`/:id/comments`, csrfProtection, async (req, res) => {
     const validationMessages = prepareErrors(errors);
     const [article, articleCategories] = await getViewArticleData(id);
 
-    res.render(`articles/post-detail`, {article, id, articleCategories, user, validationMessages, csrfToken: req.csrfToken()});
+    res.render(`articles/post-detail`, {article, id, articleCategories, user, isAdminUser, validationMessages, csrfToken: req.csrfToken()});
   }
 });
 
