@@ -5,16 +5,16 @@ block content
     section.main-page__publication.publication
       h1.publication__title Комментарии
       ul.publication__list
-        each article of articles
+        each article of articles.all.articles
           each comment of article.comments
             li.publication__list-item
               .publication__header
-                img.publication__list-image(src='/img/avatar-small-2.png' width='20' height='20' alt='Аватар пользователя')
-                b.publication__list-name Александр Петров
-                time.publication__item-time(datetime='2019-03-21T20:33') #{(new Date(article.createdDate)).toLocaleString()}
-              a.publication__item-text(href='#')
+                +insertUserAvatarSmallImage(comment.users)
+                b.publication__list-name #{comment.users.firstName} #{comment.users.lastName}
+                time.publication__item-time(datetime=`${comment.createdAt}`) #{formatDate(comment.createdAt)}
+              a.publication__item-text(href=`/articles/${article.id}`)
                 | #{article.title}
               p.publication__text-strong
                 | #{comment.text}
-              button.publication__button.button.button--close-item(type='button')
+              a.publication__button.button.button--close-item(href=`/articles/${article.id}/comments/${comment.id}`)
                 span.visually-hidden Закрыть строку списка

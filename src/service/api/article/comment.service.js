@@ -1,9 +1,12 @@
 'use strict';
 
+const Aliase = require(`../models.aliase`);
+
 class CommentService {
   constructor(sequelize) {
     this._Article = sequelize.models.Article;
     this._Comment = sequelize.models.Comment;
+    this._User = sequelize.models.User;
   }
 
   create(articleId, comment) {
@@ -26,6 +29,26 @@ class CommentService {
       raw: true
     });
   }
+
+  async findLast({limitLastComments}) {
+    let comments = await this._Comment.findAll({
+      include: [
+        {
+          model: this._User,
+          as: Aliase.USERS,
+          attributes: {
+            exclude: [`passwordHash`]
+          }
+        }
+      ],
+      order: [
+        [`createdAt`, `DESC`]
+      ],
+    });
+
+    return comments.slice(0, limitLastComments);
+  }
+
 }
 
 module.exports = CommentService;

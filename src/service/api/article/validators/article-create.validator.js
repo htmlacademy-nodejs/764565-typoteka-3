@@ -13,7 +13,7 @@ const ErrorArticleMessage = {
 };
 
 module.exports = Joi.object({
-  category: Joi.array().items(
+  categories: Joi.array().items(
       Joi.number().integer().positive().messages({
         'number.base': ErrorArticleMessage.CATEGORIES
       })
@@ -27,7 +27,7 @@ module.exports = Joi.object({
     'string.min': ErrorArticleMessage.ANNOUNCE_MIN,
     'string.max': ErrorArticleMessage.ANNOUNCE_MAX
   }),
-  description: Joi.string().max(1000).messages({
+  description: Joi.string().allow(``).max(1000).messages({
     'string.max': ErrorArticleMessage.DESCRIPTION_MAX
   }),
   userId: Joi.number().integer().positive().required().messages({
