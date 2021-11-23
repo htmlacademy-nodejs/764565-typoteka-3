@@ -1,19 +1,25 @@
 extends layout.pug
 
 block content
+  -
+    const queryString = (query) ? query : ''
+  -
+    const isResultEmpty = (result.length === 0) ? true : false
   main
     section.search-page
-      .search-page__wrapper
+      .search-page__wrapper(class=queryString && isResultEmpty ? 'search-page__wrapper--empty' : '')
         h1 Поиск
         .search.search-page__form
-          form(action='#' method='get')
+          form(action='/search' method='get')
             label
-              input(type='text' name='query' placeholder='Что ищем?')
+              input(type='text' name='query' placeholder='Что ищем?' value=`${queryString}`)
             button.search__button.button.button--transparent(type='submit') Найти
-          - var isArticle = result
-          if isArticle  
-            each article of results
-              .search__result
-                time.search__date(datetime='') #{article.createdDate}
-                a.search__link
-                  | #{article.title} 
+          if queryString
+            if !isResultEmpty
+              each article of result
+                .search__result
+                  time.search__date(datetime='') #{formatDate(article.createdAt)}
+                  a.search__link(href=`/articles/${article.id}`)
+                    | #{article.title} 
+            else
+              p.search-page__empty Ничего не нашлось

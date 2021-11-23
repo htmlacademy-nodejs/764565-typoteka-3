@@ -95,10 +95,8 @@ module.exports = {
     const categoryValues = categories.map((name) => `('${name}')`).join(`,\n`);
 
     const comments = articles.flatMap((article) => article.comments);
-    console.log(categories);
     const articleCategories = articles.map((article, index) => ({articleId: index + 1, categoryId: categories.indexOf(article.category[0]) + 1}));
-    console.log(articles);
-    console.log(articleCategories);
+
     const userValues = users.map(
         ({email, passwordHash, firstName, lastName, avatar}) =>
           `('${email}', '${passwordHash}', '${firstName}', '${lastName}', '${avatar}')`

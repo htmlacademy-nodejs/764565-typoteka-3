@@ -2,6 +2,7 @@
 
 const fs = require(`fs`).promises;
 const chalk = require(`chalk`);
+const userAdmin = require(`./constants`);
 
 module.exports.getRandomInt = (min, max) => {
   min = Math.ceil(min);
@@ -54,4 +55,12 @@ module.exports.ensureArray = (value) => Array.isArray(value) ? value : [value];
 
 module.exports.prepareErrors = (errors) => {
   return errors.response.data.split(`\n`);
+};
+
+module.exports.checkAdminRole = (user) => {
+  let isUserAdmin = false;
+  if (user) {
+    isUserAdmin = user.id === userAdmin.ADMIN.userId;
+  }
+  return isUserAdmin;
 };

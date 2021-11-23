@@ -1,0 +1,11 @@
+section.main-page__last.last
+  h2.last__name
+    | Последние комментарии 
+    span.last__icon.last__icon--cloud
+  ul.last__list
+    each lastComment of lastComments
+      li.last__list-item
+        +insertUserAvatarMiniImage(lastComment.users)
+        b.last__list-name #{lastComment.users.firstName} #{lastComment.users.lastName}
+        a.last__list-link(href=`/articles/${lastComment.articleId}`) 
+          | #{decreaseText(lastComment.text)}

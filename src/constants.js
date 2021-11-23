@@ -34,3 +34,8 @@ module.exports.HttpMethod = {
   PUT: `PUT`,
   DELETE: `DELETE`
 };
+
+module.exports.ADMIN = {
+  userId: 11
+};
+

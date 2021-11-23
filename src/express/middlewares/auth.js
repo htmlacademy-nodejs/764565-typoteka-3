@@ -1,10 +1,12 @@
 'use strict';
+const {checkAdminRole} = require(`../../utils`);
 
 module.exports = (req, res, next) => {
   const {user} = req.session;
 
-  if (!user) {
-    return res.redirect(`/login`);
+  if (checkAdminRole(user)) {
+    return next();
   }
-  return next();
+
+  return res.redirect(`/login`);
 };

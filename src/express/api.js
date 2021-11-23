@@ -20,23 +20,27 @@ class API {
     return response.data;
   }
 
-  async getArticles({offset, limit, needComments} = {}) {
-    return this._load(`/articles`, {params: {offset, limit, needComments}});
+  async getArticles({offset, limit, userId, needComments, limitPopular, limitLastComments} = {}) {
+    return this._load(`/articles`, {params: {offset, limit, userId, needComments, limitPopular, limitLastComments}});
   }
 
   async getArticle(id, needComments) {
     return this._load(`/articles/${id}`, {params: {needComments}});
   }
 
-  async search(query) {
+  async search({query}) {
     return this._load(`/search`, {params: {query}});
   }
 
-  async getCategories(count) {
-    return this._load(`/categories`, {params: {count}});
+  getCategory({categoryId, limit, offset, needComments}) {
+    return this._load(`/categories/${categoryId}`, {params: {limit, offset, needComments}});
   }
 
-  async creatArticle(data) {
+  async getCategories({withCount}) {
+    return this._load(`/categories`, {params: {withCount}});
+  }
+
+  async createArticle(data) {
     return this._load(`/articles`, {
       method: HttpMethod.POST,
       data
@@ -50,6 +54,13 @@ class API {
     });
   }
 
+  editCategory(id, data) {
+    return this._load(`/categories/${id}`, {
+      method: HttpMethod.PUT,
+      data
+    });
+  }
+
   createComment(id, data) {
     return this._load(`/articles/${id}/comments`, {
       method: HttpMethod.POST,
@@ -57,10 +68,41 @@ class API {
     });
   }
 
+  createCategory(data) {
+    return this._load(`/categories`, {
+      method: HttpMethod.POST,
+      data
+    });
+  }
+
+  removeCategory(id) {
+    return this._load(`/categories/${id}`, {
+      method: HttpMethod.DELETE
+    });
+  }
+
   createUser(data) {
     return this._load(`/user`, {
       method: HttpMethod.POST,
       data
+    });
+  }
+
+  removeArticle({id, userId}) {
+    return this._load(`/articles/${id}`, {
+      method: HttpMethod.DELETE,
+      data: {
+        userId
+      }
+    });
+  }
+
+  removeComment({id, userId, commentId}) {
+    return this._load(`/articles/${id}/comments/${commentId}`, {
+      method: HttpMethod.DELETE,
+      data: {
+        userId
+      }
     });
   }
 
