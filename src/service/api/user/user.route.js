@@ -2,7 +2,6 @@
 
 const {Router} = require(`express`);
 const {HttpCode} = require(`../../../constants`);
-
 const validatorDate = require(`../../middlewares/validator-data`);
 const registerUserValidator = require(`./validators/user-register.validator`);
 const emailExist = require(`./validators/email-exists`);

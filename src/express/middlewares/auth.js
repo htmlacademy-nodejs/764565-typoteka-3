@@ -1,4 +1,5 @@
 'use strict';
+
 const {checkAdminRole} = require(`../../utils`);
 
 module.exports = (req, res, next) => {

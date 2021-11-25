@@ -3,10 +3,9 @@
 const auth = require(`../middlewares/auth`);
 const {Router} = require(`express`);
 const {checkAdminRole} = require(`../../utils`);
+const api = require(`../api`).getAPI();
 
 const myRouter = new Router();
-
-const api = require(`../api`).getAPI();
 
 myRouter.get(`/`, auth, async (req, res) => {
   const {user} = req.session;

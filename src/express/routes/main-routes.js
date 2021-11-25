@@ -5,14 +5,13 @@ const upload = require(`../middlewares/upload`);
 const auth = require(`../middlewares/auth`);
 const {checkAdminRole} = require(`../../utils`);
 const {prepareErrors} = require(`../../utils`);
-
-const mainRouter = new Router();
-
 const api = require(`../api`).getAPI();
 
 const ARTICLES_PER_PAGE = 8;
 const ARTICLES_MOST_POPULAR = 4;
 const LAST_COMMENTS = 4;
+
+const mainRouter = new Router();
 
 mainRouter.get(`/`, async (req, res) => {
   const {user} = req.session;

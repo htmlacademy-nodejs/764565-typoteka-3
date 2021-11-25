@@ -1,17 +1,16 @@
 'use strict';
 
 const {Router} = require(`express`);
-
 const upload = require(`../middlewares/upload`);
 const auth = require(`../middlewares/auth`);
 const {checkAdminRole} = require(`../../utils`);
 const csrf = require(`csurf`);
 const {ensureArray, prepareErrors} = require(`../../utils`);
 const {HttpCode} = require(`../../constants`);
+const api = require(`../api`).getAPI();
 
 const ARTICLES_PER_PAGE = 8;
 
-const api = require(`../api`).getAPI();
 const articlesRouter = new Router();
 
 const csrfProtection = csrf();

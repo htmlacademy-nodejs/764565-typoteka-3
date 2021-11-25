@@ -11,7 +11,6 @@ const sequelize = require(`../service/api/sequelize`);
 const SequelizeStore = require(`connect-session-sequelize`)(session.Store);
 
 const DEFAULT_PORT = 8080;
-
 const PUBLIC_DIR = `public`;
 const UPLOAD_DIR = `upload`;
 
@@ -48,7 +47,7 @@ app.use(express.static(path.resolve(__dirname, PUBLIC_DIR)));
 app.use(express.static(path.resolve(__dirname, UPLOAD_DIR)));
 
 app.use((req, res) => res.status(HttpCode.BAD_REQUEST).render(`errors/404`));
-app.use((err, req, res, next) => {
+app.use((err, _req, res, _next) => {
   console.log(err);
   res.status(HttpCode.INTERNAL_SERVER_ERROR).render(`errors/500`);
 });

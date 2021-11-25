@@ -3,12 +3,10 @@
 const express = require(`express`);
 const request = require(`supertest`);
 const Sequelize = require(`sequelize`);
-
 const initDB = require(`../../lib/init-db`);
 const passwordUtils = require(`../../lib/password`);
 const search = require(`./search.route`);
 const DataService = require(`./search.service`);
-
 const {HttpCode} = require(`../../../constants`);
 
 const mockCategories = [

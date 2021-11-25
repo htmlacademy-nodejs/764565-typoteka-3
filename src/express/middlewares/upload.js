@@ -4,10 +4,10 @@ const multer = require(`multer`);
 const path = require(`path`);
 const {nanoid} = require(`nanoid`);
 
-const UPLOAD_DIR = `../upload/img/`;
-const uploadDirAbsolute = path.resolve(__dirname, UPLOAD_DIR);
-
 const FILE_TYPES = [`image/png`, `image/jpg`, `image/jpeg`];
+const UPLOAD_DIR = `../upload/img/`;
+
+const uploadDirAbsolute = path.resolve(__dirname, UPLOAD_DIR);
 
 const storage = multer.diskStorage({
   destination: uploadDirAbsolute,
@@ -19,11 +19,7 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (req, file, cb) => {
-  if (FILE_TYPES.includes(file.mimetype)) {
-    cb(null, true);
-  } else {
-    cb(null, false);
-  }
+  cb(null, FILE_TYPES.includes(file.mimetype));
 };
 
 const upload = multer({storage, fileFilter});

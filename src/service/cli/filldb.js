@@ -5,25 +5,23 @@ const {getLogger} = require(`../lib/logger`);
 const sequelize = require(`../api/sequelize`);
 const passwordUtils = require(`../lib/password`);
 const initDatabase = require(`../lib/init-db`);
-
 const {
   getRandomInt,
   shuffle,
   readContentFromFile,
 } = require(`../../utils`);
 
-const FILE_SENTENCES_PATH = `./data/sentences.txt`;
-const FILE_TITLES_PATH = `./data/titles.txt`;
-const FILE_CATEGORIES_PATH = `./data/categories.txt`;
-const FILE_COMMENTS_PATH = `./data/comments.txt`;
-
+const FILE_PATH = {
+  SENTENCES: `./data/sentences.txt`,
+  TITLES: `./data/titles.txt`,
+  CATEGORIES: `./data/categories.txt`,
+  COMMENTS: `./data/comments.txt`
+};
 const DEFAULT_PUBLICATIONS_COUNT = 1;
 const MAX_PUBLICATIONS_COUNT = 1000;
-
 const MAX_CATEGORIES = 4;
 
 const logger = getLogger({});
-
 
 const generateRandomUser = (users) => {
   return users[getRandomInt(0, users.length - 1)].email;
@@ -94,10 +92,10 @@ module.exports = {
       checkCountPublicationsOverflow(countPublications);
 
       const [sentences, titles, categories, comments] = await Promise.all([
-        readContentFromFile(FILE_SENTENCES_PATH),
-        readContentFromFile(FILE_TITLES_PATH),
-        readContentFromFile(FILE_CATEGORIES_PATH),
-        readContentFromFile(FILE_COMMENTS_PATH)
+        readContentFromFile(FILE_PATH.SENTENCES),
+        readContentFromFile(FILE_PATH.TITLES),
+        readContentFromFile(FILE_PATH.CATEGORIES),
+        readContentFromFile(FILE_PATH.COMMENTS)
       ]);
       const users = [
         {
