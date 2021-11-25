@@ -15,14 +15,12 @@ module.exports = (app, service) => {
   route.get(`/`, async (req, res) => {
     const {withCount} = req.query;
     const categories = await service.findAll(withCount);
-
     res.status(HttpCode.OK)
       .json(categories);
   });
 
   route.post(`/`, validatorDate(categoryCreateValidator), async (req, res) => {
     const category = await service.create(req.body);
-
     return res.status(HttpCode.CREATED)
       .json(category);
   });
@@ -30,11 +28,8 @@ module.exports = (app, service) => {
   route.get(`/:categoryId`, async (req, res) => {
     const {categoryId} = req.params;
     const {limit, offset, needComments} = req.query;
-
     const category = await service.findOne(categoryId);
-
     const {count, articlesByCategory} = await service.findPage(categoryId, limit, offset, needComments);
-
     res.status(HttpCode.OK)
       .json({
         category,
@@ -45,9 +40,7 @@ module.exports = (app, service) => {
 
   route.put(`/:categoryId`, validatorDate(categoryEditValidator), async (req, res) => {
     const {categoryId} = req.params;
-
     const existCategory = await service.findOne(categoryId);
-
     if (existCategory) {
       const updatedCategory = await service.update(categoryId, req.body);
       return res.status(HttpCode.OK)
@@ -61,7 +54,6 @@ module.exports = (app, service) => {
   route.delete(`/:categoryId`, categoryUses(service), async (req, res) => {
     const {categoryId} = req.params;
     const deleted = await service.drop(categoryId);
-
     if (deleted) {
       return res.status(HttpCode.OK)
         .json(deleted);
