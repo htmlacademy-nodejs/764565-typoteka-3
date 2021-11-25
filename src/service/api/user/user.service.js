@@ -7,9 +7,12 @@ class UserService {
     this._User = sequelize.models.User;
   }
 
-  async create(userData) {
-    const user = await this._User.create(userData);
-    return user.get();
+  async createUser(userData) {
+    userData.passwordHash = await passwordUtils.hash(userData.password);
+    const userNew = await this._User.create(userData);
+    const user = userNew.get();
+    delete user.passwordHash;
+    return user;
   }
 
   async findByEmail(email) {
@@ -17,11 +20,6 @@ class UserService {
       where: {email}
     });
     return user && user.get();
-  }
-
-  async createHash(userData) {
-    userData.passwordHash = await passwordUtils.hash(userData.password);
-    return userData;
   }
 
   async compareHash(password, passwordHash) {

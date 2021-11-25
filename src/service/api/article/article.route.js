@@ -16,15 +16,16 @@ module.exports = (app, articleService, commentService) => {
 
   route.get(`/`, async (req, res) => {
     const {offset, limit, needComments, limitPopular, limitLastComments} = req.query;
-    let articles = {};
-
-    let lastComments;
-    articles.all = await articleService.findAll({limit, offset, needComments});
-
-    articles.commented = await articleService.findMostPopular({limitPopular});
-
-    lastComments = await commentService.findLast({limitLastComments});
-
+    const [
+      articlesAll,
+      articlesCommented,
+      lastComments
+    ] = await Promise.all([
+      articleService.findAll({limit, offset, needComments}),
+      articleService.findMostPopular({limitPopular}),
+      commentService.findLast({limitLastComments})
+    ]);
+    const articles = {all: articlesAll, commented: articlesCommented};
     return res.status(HttpCode.OK).json({articles, lastComments});
 
   });
@@ -32,7 +33,6 @@ module.exports = (app, articleService, commentService) => {
   route.get(`/:articleId`, validatorRoute, async (req, res) => {
     const {articleId} = req.params;
     const {needComments} = req.query;
-
     const article = await articleService.findOne({articleId, needComments});
     if (article) {
       return res.status(HttpCode.OK)
@@ -45,7 +45,6 @@ module.exports = (app, articleService, commentService) => {
 
   route.post(`/`, validatorDate(createArticleValidator), async (req, res) => {
     const article = await articleService.create(req.body);
-
     return res.status(HttpCode.CREATED)
       .json(article);
   });
@@ -55,26 +54,20 @@ module.exports = (app, articleService, commentService) => {
     const updatedArticle = await articleService.update({id: articleId, article: req.body});
     return res.status(HttpCode.OK)
       .json(updatedArticle);
-
   });
 
   route.delete(`/:articleId`, validatorRoute, async (req, res) => {
     const {articleId} = req.params;
-
     const article = await articleService.findOne({articleId});
-
     if (!article) {
       return res.status(HttpCode.NOT_FOUND)
         .send(`Not found`);
     }
-
     const deletedArticle = await articleService.drop({articleId});
-
     if (!deletedArticle) {
       return res.status(HttpCode.FORBIDDEN)
         .send(`Forbidden`);
     }
-
     return res.status(HttpCode.OK)
       .json(deletedArticle);
   });
@@ -82,7 +75,6 @@ module.exports = (app, articleService, commentService) => {
   route.get(`/:articleId/comments`, [validatorRoute, articleExist(articleService)], async (req, res) => {
     const {articleId} = req.params;
     const comments = await commentService.findAll(articleId);
-
     res.status(HttpCode.OK)
       .json(comments);
   });
@@ -90,7 +82,6 @@ module.exports = (app, articleService, commentService) => {
   route.delete(`/:articleId/comments/:commentId`, [validatorRoute, articleExist(articleService)], async (req, res) => {
     const {commentId} = req.params;
     const deleted = await commentService.drop(commentId);
-
     if (deleted) {
       return res.status(HttpCode.OK)
         .json(deleted);
@@ -102,10 +93,8 @@ module.exports = (app, articleService, commentService) => {
 
   route.post(`/:articleId/comments`, [validatorRoute, articleExist(articleService), validatorDate(commentValidator)], async (req, res) => {
     const {articleId} = req.params;
-    const comment = commentService.create(articleId, req.body);
-
+    const comment = await commentService.create(articleId, req.body);
     return res.status(HttpCode.CREATED)
       .json(comment);
   });
-
 };
