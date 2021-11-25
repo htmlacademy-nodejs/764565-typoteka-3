@@ -18,16 +18,13 @@ class ArticleService {
   }
 
   async update({id, article}) {
-    const affectedRows = await this._Article.update(article, {
-      where: {
-        id,
-      }
-    });
-    const updatedArticle = await this._Article.findOne({
-      where: {
-        id,
-      }
-    });
+    const [
+      affectedRows,
+      updatedArticle
+    ] = await Promise.all([
+      this._Article.update(article, {where: {id}}),
+      this._Article.findOne({where: {id}})
+    ]);
 
     await updatedArticle.setCategories(article.categories);
 

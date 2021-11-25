@@ -152,7 +152,6 @@ articlesRouter.get(`/:id`, csrfProtection, async (req, res) => {
   const isAdminUser = checkAdminRole(user);
 
   const [article, articleCategories] = await getViewArticleData(id);
-  console.log([article, articleCategories]);
 
   res.render(`articles/post-detail`, {article, id, articleCategories, user, isAdminUser, csrfToken: req.csrfToken()});
 });

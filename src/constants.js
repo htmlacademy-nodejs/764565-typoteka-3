@@ -36,6 +36,6 @@ module.exports.HttpMethod = {
 };
 
 module.exports.ADMIN = {
-  userId: 11
+  userId: 1
 };
 

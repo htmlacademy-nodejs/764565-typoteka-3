@@ -9,7 +9,7 @@ class CommentService {
     this._User = sequelize.models.User;
   }
 
-  create(articleId, comment) {
+  async create(articleId, comment) {
     return this._Comment.create({
       articleId,
       ...comment

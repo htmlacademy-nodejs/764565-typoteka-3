@@ -18,13 +18,7 @@ module.exports = (app, userService) => {
 
   route.post(`/`, [validatorDate(registerUserValidator), emailExist(userService)], async (req, res) => {
     const data = req.body;
-
-    await userService.createHash(data);
-
-    const result = await userService.create(data);
-
-    delete result.passwordHash;
-
+    const result = await userService.createUser(data);
     res.status(HttpCode.CREATED)
       .json(result);
   });
@@ -32,14 +26,11 @@ module.exports = (app, userService) => {
   route.post(`/auth`, async (req, res) => {
     const {email, password} = req.body;
     const user = await userService.findByEmail(email);
-
     if (!user) {
       res.status(HttpCode.UNAUTHORIZED).send(ErrorAuthMessage.EMAIL);
       return;
     }
-
     const passwordIsCorrect = await userService.compareHash(password, user.passwordHash);
-
     if (passwordIsCorrect) {
       delete user.passwordHash;
       res.status(HttpCode.OK).json(user);
