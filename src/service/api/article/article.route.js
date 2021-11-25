@@ -37,10 +37,9 @@ module.exports = (app, articleService, commentService) => {
     if (article) {
       return res.status(HttpCode.OK)
         .json(article);
-    } else {
-      return res.status(HttpCode.NOT_FOUND)
-      .send(`Not found with ${articleId}`);
     }
+    return res.status(HttpCode.NOT_FOUND)
+      .send(`Not found with ${articleId}`);
   });
 
   route.post(`/`, validatorDate(createArticleValidator), async (req, res) => {
@@ -85,10 +84,9 @@ module.exports = (app, articleService, commentService) => {
     if (deleted) {
       return res.status(HttpCode.OK)
         .json(deleted);
-    } else {
-      return res.status(HttpCode.NOT_FOUND)
-      .send(`Not found`);
     }
+    return res.status(HttpCode.NOT_FOUND)
+      .send(`Not found`);
   });
 
   route.post(`/:articleId/comments`, [validatorRoute, articleExist(articleService), validatorDate(commentValidator)], async (req, res) => {

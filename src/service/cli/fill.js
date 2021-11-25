@@ -1,8 +1,6 @@
 'use strict';
 
 const chalk = require(`chalk`);
-
-
 const {
   getRandomInt,
   shuffle,
@@ -11,15 +9,14 @@ const {
 } = require(`../../utils`);
 
 
-const FILE_SENTENCES_PATH = `./data/sentences.txt`;
-const FILE_TITLES_PATH = `./data/titles.txt`;
-const FILE_CATEGORIES_PATH = `./data/categories.txt`;
-const FILE_COMMENTS_PATH = `./data/comments.txt`;
-
+const FILE_PATH = {
+  SENTENCES: `./data/sentences.txt`,
+  TITLES: `./data/titles.txt`,
+  CATEGORIES: `./data/categories.txt`,
+  COMMENTS: `./data/comments.txt`
+};
 const DEFAULT_PUBLICATIONS_COUNT = 1;
-
 const MAX_CATEGORIES = 4;
-
 const FILE_NAME = `fill-db-auto.sql`;
 
 const generateRandomTitle = (titles) => {
@@ -65,10 +62,10 @@ module.exports = {
   async run(args) {
 
     const [sentences, titles, categories, commentSentences] = await Promise.all([
-      readContentFromFile(FILE_SENTENCES_PATH),
-      readContentFromFile(FILE_TITLES_PATH),
-      readContentFromFile(FILE_CATEGORIES_PATH),
-      readContentFromFile(FILE_COMMENTS_PATH)
+      readContentFromFile(FILE_PATH.SENTENCES),
+      readContentFromFile(FILE_PATH.TITLES),
+      readContentFromFile(FILE_PATH.CATEGORIES),
+      readContentFromFile(FILE_PATH.COMMENTS)
     ]);
 
     const [count] = args;

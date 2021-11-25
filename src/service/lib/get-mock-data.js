@@ -3,11 +3,11 @@
 const {
   readContentFromJsonFile,
 } = require(`../../utils`);
-
 const {getLogger} = require(`./logger`);
+const FILENAME = `mocks.json`;
+
 const logger = getLogger({name: `api`});
 
-const FILENAME = `mocks.json`;
 let data = [];
 
 const getMockData = async () => {

@@ -2,6 +2,7 @@
 
 const axios = require(`axios`);
 const {HttpMethod} = require(`../constants`);
+
 const TIMEOUT = 10000;
 
 const port = process.env.API_PORT || 3000;
@@ -15,21 +16,12 @@ class API {
     });
   }
 
-  async _load(url, options) {
-    const response = await this._http.request({url, ...options});
-    return response.data;
-  }
-
   async getArticles({offset, limit, userId, needComments, limitPopular, limitLastComments} = {}) {
     return this._load(`/articles`, {params: {offset, limit, userId, needComments, limitPopular, limitLastComments}});
   }
 
   async getArticle(id, needComments) {
     return this._load(`/articles/${id}`, {params: {needComments}});
-  }
-
-  async search({query}) {
-    return this._load(`/search`, {params: {query}});
   }
 
   getCategory({categoryId, limit, offset, needComments}) {
@@ -42,6 +34,27 @@ class API {
 
   async createArticle(data) {
     return this._load(`/articles`, {
+      method: HttpMethod.POST,
+      data
+    });
+  }
+
+  createComment(id, data) {
+    return this._load(`/articles/${id}/comments`, {
+      method: HttpMethod.POST,
+      data
+    });
+  }
+
+  createCategory(data) {
+    return this._load(`/categories`, {
+      method: HttpMethod.POST,
+      data
+    });
+  }
+
+  createUser(data) {
+    return this._load(`/user`, {
       method: HttpMethod.POST,
       data
     });
@@ -61,30 +74,9 @@ class API {
     });
   }
 
-  createComment(id, data) {
-    return this._load(`/articles/${id}/comments`, {
-      method: HttpMethod.POST,
-      data
-    });
-  }
-
-  createCategory(data) {
-    return this._load(`/categories`, {
-      method: HttpMethod.POST,
-      data
-    });
-  }
-
   removeCategory(id) {
     return this._load(`/categories/${id}`, {
       method: HttpMethod.DELETE
-    });
-  }
-
-  createUser(data) {
-    return this._load(`/user`, {
-      method: HttpMethod.POST,
-      data
     });
   }
 
@@ -111,6 +103,15 @@ class API {
       method: HttpMethod.POST,
       data: {email, password}
     });
+  }
+
+  async search({query}) {
+    return this._load(`/search`, {params: {query}});
+  }
+
+  async _load(url, options) {
+    const response = await this._http.request({url, ...options});
+    return response.data;
   }
 }
 

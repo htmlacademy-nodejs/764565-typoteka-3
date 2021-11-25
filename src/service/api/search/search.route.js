@@ -15,8 +15,7 @@ module.exports = (app, service) => {
       const searchStatus = searchResults.length > 0 ? HttpCode.OK : HttpCode.NOT_FOUND;
       return res.status(searchStatus)
         .json(searchResults);
-    } else {
-      return res.status(HttpCode.BAD_REQUEST).json([]);
     }
+    return res.status(HttpCode.BAD_REQUEST).json([]);
   });
 };

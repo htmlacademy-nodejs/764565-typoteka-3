@@ -4,14 +4,14 @@ const fs = require(`fs`).promises;
 const chalk = require(`chalk`);
 const userAdmin = require(`./constants`);
 
-module.exports.getRandomInt = (min, max) => {
+const getRandomInt = (min, max) => {
   min = Math.ceil(min);
   max = Math.floor(max);
 
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
-module.exports.shuffle = (someArray) => {
+const shuffle = (someArray) => {
   for (let i = someArray.length - 1; i > 0; i--) {
     const randomPosition = Math.floor(Math.random() * i);
     [someArray[i], someArray[randomPosition]] = [someArray[randomPosition], someArray[i]];
@@ -20,7 +20,7 @@ module.exports.shuffle = (someArray) => {
   return someArray;
 };
 
-module.exports.readContentFromFile = async (filePath) => {
+const readContentFromFile = async (filePath) => {
   try {
     const content = await fs.readFile(filePath, `utf8`);
     return content.trim().split(`\n`).map((item) => item.replace(`\r`, ``));
@@ -30,7 +30,7 @@ module.exports.readContentFromFile = async (filePath) => {
   }
 };
 
-module.exports.readContentFromJsonFile = async (fileName) => {
+const readContentFromJsonFile = async (fileName) => {
   try {
     const fileContent = await fs.readFile(fileName);
     return JSON.parse(fileContent);
@@ -40,7 +40,7 @@ module.exports.readContentFromJsonFile = async (fileName) => {
   }
 };
 
-module.exports.writeJsonFile = async (fileName, data) => {
+const writeJsonFile = async (fileName, data) => {
   try {
     const jsonStr = JSON.stringify(data);
     await fs.writeFile(fileName, jsonStr);
@@ -51,16 +51,18 @@ module.exports.writeJsonFile = async (fileName, data) => {
   }
 };
 
-module.exports.ensureArray = (value) => Array.isArray(value) ? value : [value];
+const ensureArray = (value) => Array.isArray(value) ? value : [value];
 
-module.exports.prepareErrors = (errors) => {
+const prepareErrors = (errors) => {
   return errors.response.data.split(`\n`);
 };
 
-module.exports.checkAdminRole = (user) => {
+const checkAdminRole = (user) => {
   let isUserAdmin = false;
   if (user) {
-    isUserAdmin = user.id === userAdmin.ADMIN.userId;
+    isUserAdmin = user.id === userAdmin.ADMIN_ID.userId;
   }
   return isUserAdmin;
 };
+
+module.exports = {getRandomInt, shuffle, readContentFromFile, readContentFromJsonFile, writeJsonFile, ensureArray, prepareErrors, checkAdminRole};

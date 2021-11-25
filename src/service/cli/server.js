@@ -5,7 +5,6 @@ const routes = require(`../api/index.route`);
 const {getLogger} = require(`../lib/logger`);
 const sequelize = require(`../api/sequelize`);
 const boolParser = require(`express-query-boolean`);
-
 const {HttpCode, API_PREFIX} = require(`../../constants`);
 
 const DEFAULT_PORT = 3000;
@@ -58,7 +57,6 @@ module.exports = {
         if (err) {
           return logger.error(`An error occurred on server creation: ${err.message}`);
         }
-
         return logger.info(`Listening to connections on ${port}`);
       });
     } catch (err) {

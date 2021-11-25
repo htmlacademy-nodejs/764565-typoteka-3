@@ -3,7 +3,6 @@
 const express = require(`express`);
 const request = require(`supertest`);
 const Sequelize = require(`sequelize`);
-
 const initDB = require(`../../lib/init-db`);
 const passwordUtils = require(`../../lib/password`);
 const user = require(`./user.route`);

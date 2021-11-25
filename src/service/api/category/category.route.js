@@ -45,10 +45,9 @@ module.exports = (app, service) => {
       const updatedCategory = await service.update(categoryId, req.body);
       return res.status(HttpCode.OK)
         .json(updatedCategory);
-    } else {
-      return res.status(HttpCode.NOT_FOUND)
-        .send(`Not found with ${categoryId}`);
     }
+    return res.status(HttpCode.NOT_FOUND)
+      .send(`Not found with ${categoryId}`);
   });
 
   route.delete(`/:categoryId`, categoryUses(service), async (req, res) => {
@@ -57,9 +56,8 @@ module.exports = (app, service) => {
     if (deleted) {
       return res.status(HttpCode.OK)
         .json(deleted);
-    } else {
-      return res.status(HttpCode.NOT_FOUND)
-      .send(`Not found`);
     }
+    return res.status(HttpCode.NOT_FOUND)
+      .send(`Not found`);
   });
 };
